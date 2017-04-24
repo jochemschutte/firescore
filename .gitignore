@@ -6,3 +6,4 @@ test/
 src/crap
 output
 data
+*.jar

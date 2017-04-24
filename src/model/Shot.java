@@ -1,5 +1,9 @@
 package model;
 
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 public class Shot{
 	
 	double score;
@@ -12,7 +16,7 @@ public class Shot{
 	}
 	
 	public int getPoints(){
-		return (int)Math.ceil(score);
+		return Math.max((int)Math.ceil(score), 0);
 	}
 
 	public double getScore() {
@@ -35,6 +39,23 @@ public class Shot{
 		return Coordinate.fromPolar(angle, 10-score);
 	}
 	
+	public static Coordinate avgXY(Collection<Shot> shots){
+		List<Coordinate> cs = new LinkedList<>();
+		for(Shot shot : shots){
+			cs.add(shot.getXY());
+		}
+		return Coordinate.avg(cs);
+	}
 	
+	public static double avgPoints(Collection<Shot> shots){
+		return Math.round((double)Shot.sumPoints(shots)/shots.size()*10)/10.0;
+	}
 	
+	public static int sumPoints(Collection<Shot> shots){
+		int total = 0;
+		for(Shot shot : shots){
+			total += shot.getPoints();
+		}
+		return total;
+	}
 }

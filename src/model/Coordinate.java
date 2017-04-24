@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Collection;
+
 public class Coordinate{
 
 	private double x;
@@ -18,8 +20,22 @@ public class Coordinate{
 		return y;
 	}
 	
-	public Coordinate combine(Coordinate c){
+	public Coordinate add(Coordinate c){
 		return instance(this.x + c.x(), this.y + c.y());
+	}
+	
+	public Coordinate schale(double factor){
+		return instance(this.x*factor, this.y*factor);
+	}
+	
+	public static Coordinate avg(Collection<Coordinate> cs){
+		double xTotal= 0;
+		double yTotal = 0;
+		for(Coordinate c : cs){
+			xTotal += c.x();
+			yTotal += c.y();
+		}
+		return Coordinate.instance(xTotal/cs.size(), yTotal/cs.size());
 	}
 	
 	public static Coordinate instance(double x, double y){

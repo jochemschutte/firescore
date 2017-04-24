@@ -1,5 +1,6 @@
 package exec;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
@@ -25,8 +26,18 @@ public class FireScore{
 			Config generalConfig = Config.getConfig("configs/global");
 			Job job = new Job(inputFile, outputFolder, generalConfig);
 			System.out.println("Starting...");
-			job.run();
-			System.out.println("_Finished.");
+			File htmlFile = job.run();
+			System.out.println();
+			if(args.length < 2 || !args[1].toLowerCase().matches("-?n")){
+				System.out.println("Opening output in browser");
+				Desktop.getDesktop().browse(htmlFile.toURI());
+				try{
+					Thread.sleep(2000);
+				}catch(InterruptedException e){}
+			}else{
+				System.out.println("Not opening output in browser");
+			}
+			System.out.println("_Finished");
 		}catch(IOException e){
 			e.printStackTrace();
 		}

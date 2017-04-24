@@ -32,9 +32,9 @@ public class Job{
 		this.outputFolder = outputFolder;
 	}
 	
-	public void run() throws IOException {
+	public File run() throws IOException {
 		generateCards();
-		writeHtml();
+		return writeHtml();
 	}
 	
 	private void generateCards() throws IOException{
@@ -61,8 +61,9 @@ public class Job{
 		card.draw(new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
 	}
 	
-	private void writeHtml() throws IOException{
-		BufferedWriter out = new BufferedWriter(new FileWriter(String.format("%s/scores.html", outputFolder.getAbsolutePath())));
+	private File writeHtml() throws IOException{
+		File outputFile = new File(String.format("%s/scores.html", outputFolder.getAbsolutePath()));
+		BufferedWriter out = new BufferedWriter(new FileWriter(outputFile));
 		out.write("<html>\n");
 		out.write(h(1, inputFile.getParentFile().getName()));
 		out.write("<font size=5>");
@@ -77,7 +78,7 @@ public class Job{
 		File totalCard = new File(String.format("%s/cards/%s_total.png", outputFolder.getAbsolutePath(), this.discipline));
 		if(totalCard.exists()){
 			out.write(totalCard.getName().split("\\.")[0] + "<br />\n");
-			out.write(imgHtml(totalCard) + "\n");
+			out.write(imgHtml(totalCard) + "<br />&nbsp <br />\n");
 		}
 		
 		File sumCard = new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), this.discipline));
@@ -88,6 +89,7 @@ public class Job{
 		out.write("</font>\n</html>");
 		out.flush();
 		out.close();
+		return outputFile;
 	}
 		
 	private File getCardFile(int suffix){

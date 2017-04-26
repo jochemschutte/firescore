@@ -24,7 +24,8 @@ public class Card{
 	public enum Offset {SHOTS, AVGSHOT, SCORE};
 	public enum Color {BLUE, RED};
 	public enum AVGMode {PERVISUAL, TOTAL};
-	protected static final String dotPath = "cards/dots";
+	public static final String cardPath = "cards";
+	public static final String dotPath = "cards/dots";
 	protected static final Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 30);
 //	public int factor = 18;
 //	public int bulletSize = 30;

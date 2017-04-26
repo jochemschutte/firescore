@@ -8,3 +8,4 @@ deviation = 18 %px
 offsets.SHOTS= [237\,237,765\,237,501\,501,237\,765,765\,765]
 offsets.AVGSHOT = 501,501 
 offsets.SCORE = 910,40 
+rotations = [0,-90,0,180,90]

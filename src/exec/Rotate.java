@@ -67,10 +67,12 @@ public class Rotate{
 			String[] parts = line.split(";");
 			String[] resultParts = new String[parts.length];
 			for(int i = 0; i < parts.length; i++){
-				if(!parts[i].equals("")){
+				if(!parts[i].equals(io.ShotReader.NULL)){
 					String[] elems = parts[i].split(",");
-					elems[1] = Integer.toString(Integer.parseInt(elems[1]) + mods.get(i));
+					elems[1] = Integer.toString(Integer.parseInt(elems[1]) + -1*mods.get(i));
 					resultParts[i] = String.join(",", elems);
+				}else{
+					resultParts[i] = io.ShotReader.NULL;
 				}
 			}
 			result.add(String.join(";", resultParts));

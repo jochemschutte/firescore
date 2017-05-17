@@ -20,14 +20,12 @@ import model.cards.Card.AVGMode;
 
 public class Job{
 	
-	private int imgSize;
 	private String discipline;
 	private File inputFile;
 	private File outputFolder;
 	private Config cardConfig;
 	
 	public Job(File inputFile, File outputFolder, Config general){
-		this.imgSize = general.getInt("imgSize");
 		this.inputFile = inputFile;
 		this.outputFolder = outputFolder;
 	}
@@ -41,24 +39,63 @@ public class Job{
 		DocInput input = io.ShotReader.read(inputFile);
 		this.discipline = input.getDiscipline();
 		this.cardConfig = Config.getConfig(String.format("cards/%s", input.getDiscipline()));
+		int imgSize = cardConfig.getInt("imgSize");
+		int nrVisuals = cardConfig.getInt("nrVisuals");
 		List<List<Shot>> read = input.getShots();
 		File cardsFolder = new File(String.format("%s/cards", outputFolder.getAbsolutePath()));
 		cardsFolder.mkdirs();
 		int i = 1;
 		for(List<Shot> shots : read){ 
-			Card card = getCard(model.cards.Card.AVGMode.TOTAL, cardConfig);
+			Card card = getCard(model.cards.Card.AVGMode.TOTAL, cardConfig, imgSize);
 			card.setShotsInSequence(shots);
 			File outputFile = new File(String.format("%s/cards/%s_%d.png", outputFolder.getAbsolutePath(), input.getDiscipline(), i));
 			card.draw(outputFile);
 			i++;
 		}
-		Card card = getCard(AVGMode.PERVISUAL, cardConfig);
-		card.setShotList(flipLists(read));
-		card.draw(new File(String.format("%s/cards/%s_total.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
-		
-		card = getCard(AVGMode.TOTAL, cardConfig); 
-		card.setShotList(allInBag(2, read));
+		List<List<Shot>> flipped = flipLists(read);
+		List<List<Shot>> flattened = flatten(flipped, cardConfig.getInt("nrVisuals"));
+		if(hasMultipleVisualsWithShots(flattened)){
+			Card card = getCard(AVGMode.PERVISUAL, cardConfig, imgSize);
+			card.setShotList(flattened);
+			card.draw(new File(String.format("%s/cards/%s_total.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
+		}else{
+			System.out.println("Average card was omitted due to only having one visual");
+		}
+		Card card = getCard(AVGMode.TOTAL, cardConfig, imgSize);
+		card.setShotList(allInBag(cardConfig.getInt("avgVisual"), nrVisuals, flipped));
 		card.draw(new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
+	}
+	
+	public static boolean hasMultipleVisualsWithShots(List<List<Shot>> shots){
+		int nrVisuals = 0;
+		for(List<Shot> inner: shots){
+			if(inner.size() > 0){
+				nrVisuals++;
+			}
+		}
+		return nrVisuals > 1;
+	}
+	
+	private static List<List<Shot>> flatten(List<List<Shot>> shots, int nrVisuals){
+		List<List<Shot>> result = new ArrayList<>();
+		for(int i = 0; i < nrVisuals; i++){
+			result.add(new LinkedList<>());
+		}
+		for(int i = 0; i < shots.size(); i++){
+			int pointer = i%nrVisuals;
+			result.get(pointer).addAll(shots.get(i));
+		}
+		return result;
+	}
+	
+	@Deprecated
+	private static void dump(List<List<Shot>> outer){
+		for(int i = 0; i < outer.size(); i++){
+			List<Shot> inner = outer.get(i);
+			for(int j = 0; j < inner.size(); j++){
+				System.out.println(String.format("%d-%d", i, j));
+			}
+		}
 	}
 	
 	private File writeHtml() throws IOException{
@@ -69,7 +106,7 @@ public class Job{
 		out.write("<font size=5>");
 		for(int i = 1; getCardFile(i).exists(); i++){
 			File card = getCardFile(i);
-			if(card.getName().matches(".+_[0-9].png")){
+			if(card.getName().matches(".+_[0-9]+.png")){
 				out.write(card.getName().split("\\.")[0] + "<br />\n");
 				out.write(imgHtml(card) + "<br />&nbsp <br />\n");
 			}
@@ -101,13 +138,14 @@ public class Job{
 	}
 	
 	private String imgHtml(File card){
+		int imgSize = cardConfig.getInt("imgSize");
 		return String.format("<img src=\"cards/%s\" width=%d hight=%d>", card.getName(), imgSize, imgSize);
 	}
 	
-	private static <T> List<List<T>> allInBag(int bagId, List<List<T>> list){
+	private static <T> List<List<T>> allInBag(int bagId, int nrVisuals, List<List<T>> list){
 		List<List<T>> result = new ArrayList<>();
-		for(int i = 0; i < list.size(); i++){
-			result .add(new LinkedList<>());
+		for(int i = 0; i < nrVisuals; i++){
+			result.add(new LinkedList<>());
 		}
 		for(List<T> inner : list){
 			result.get(bagId).addAll(inner);
@@ -129,7 +167,7 @@ public class Job{
 		return result;
 	}
 	
-	private static Card getCard(Card.AVGMode mode, Config prop){
+	public static Card getCard(Card.AVGMode mode, Config prop, int imgSize){
 		String discipline = getDiscipline(prop);
 		File background = new File(String.format("cards/%s.png", discipline));
 		Map<Card.Offset, Object> offsetMap = new TreeMap<>();
@@ -138,7 +176,8 @@ public class Job{
 		offsetMap.put(Card.Offset.SHOTS, getCoordinates(prop.getList("offsets.SHOTS")));
 		int deviation = prop.getInt("deviation");
 		int bulletSize = prop.getInt("bulletSize");
-		return new Card(background, offsetMap, deviation, bulletSize, mode);
+		int textSize = prop.getInt("textSize");
+		return new Card(background, offsetMap, deviation, bulletSize, textSize, mode);
 	}
 	
 	private static String getDiscipline(Config prop){
@@ -149,7 +188,18 @@ public class Job{
 		return String.format("%s_%s_%dv_%dm", bullet, weapon, nrVisuals, distance);
 	}
 	
-	private static Coordinate[] getCoordinates(List<String> values){
+	public static Map<Integer, Integer> aggegateScores(List<Shot> shots){
+		Map<Integer, Integer> result = new TreeMap<>();
+		for(int i = 1; i <= 10; i++){
+			result.put(i, 0);
+		}
+		for(Shot shot : shots){
+			result.put(shot.getPoints(), result.get(shot.getPoints()));
+		}
+		return result;
+	}
+	
+	public static Coordinate[] getCoordinates(List<String> values){
 		List<Coordinate> result = new LinkedList<>();
 		for(String c : values){
 			result.add(getCoordinate(c));

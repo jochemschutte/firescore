@@ -11,8 +11,7 @@ public class Shot{
 	
 	public Shot(double score, int angle) {
 		this.score = score;
-		this.angle = angle;
-		
+		this.angle = angle;	
 	}
 	
 	public int getPoints(){

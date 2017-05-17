@@ -26,7 +26,6 @@ public class Card{
 	public enum AVGMode {PERVISUAL, TOTAL};
 	public static final String cardPath = "cards";
 	public static final String dotPath = "cards/dots";
-	protected static final Font font = new Font(Font.SANS_SERIF, Font.PLAIN, 30);
 //	public int factor = 18;
 //	public int bulletSize = 30;
 //	protected Coordinate[] offsets = {
@@ -48,12 +47,13 @@ public class Card{
 	private Coordinate[] offsets;
 	private Coordinate avgOffset;
 	private Coordinate scoreOffset;
+	private Font font;
 	
 	private AVGMode avgMode;
 	private BufferedImage background;
 	private List<List<Shot>> shots = new LinkedList<>();
 	
-	public Card(File backgroundLocation, Map<Offset, Object> offsetMap, int deviation, int bulletSize, AVGMode mode){
+	public Card(File backgroundLocation, Map<Offset, Object> offsetMap, int deviation, int bulletSize, int textSize, AVGMode mode){
 		this.avgMode = mode;
 		this.offsets = (Coordinate[])(offsetMap.get(Offset.SHOTS));
 		this.nrVisuals = this.offsets.length;
@@ -61,6 +61,7 @@ public class Card{
 		this.bulletSize = bulletSize;
 		this.avgOffset = (Coordinate)offsetMap.get(Offset.AVGSHOT);
 		this.scoreOffset = (Coordinate)offsetMap.get(Offset.SCORE);
+		this.font = new Font(Font.SANS_SERIF, Font.PLAIN, textSize);
 		this.setShotsInSequence(new LinkedList<>());
 		try{
 			this.background = ImageIO.read(backgroundLocation);
@@ -68,7 +69,7 @@ public class Card{
 			e.printStackTrace();
 		}
 	}
-
+	
 	public List<Shot> getShots() {
 		return flatten(this.shots);
 	}
@@ -92,12 +93,27 @@ public class Card{
 		}
 		Iterator<Shot> iter = shots.iterator();
 		for(int i = 0; iter.hasNext(); i++){
-			this.shots.get(i%nrVisuals).add(iter.next());
+			Shot shot = iter.next();
+			if(shot != null){
+				this.shots.get(i%nrVisuals).add(shot);
+			}
 		}
 	}
 	
 	public void setShotList(List<List<Shot>> shots){
-		this.shots = shots;
+		this.shots = filterNull(shots);
+	}
+	
+	public static List<List<Shot>> filterNull(List<List<Shot>> shots){
+		for(List<Shot> inner : shots){
+			Iterator<Shot> iter = inner.iterator();
+			while(iter.hasNext()){
+				if(iter.next() == null){
+					iter.remove();
+				}
+			}
+		}
+		return shots;
 	}
 	
 	public void draw(File output) throws IOException{
@@ -106,23 +122,25 @@ public class Card{
 		g.setFont(font);
 		g.setColor(java.awt.Color.RED);
 		for(int i = 0; i < this.shots.size(); i++){
+			int visualPointer = i%nrVisuals;
 			List<Shot> shotList = shots.get(i);
 			for(Shot shot : shotList){
-				drawDot(g, shot, offsets[i], Color.RED);
+				drawDot(g, shot, offsets[visualPointer], Color.RED);
 			}
+			String points = null;
 			if(this.shots.get(i).size() == 1){
-				Shot shot = shotList.get(0);
-				g.drawString(Integer.toString(shot.getPoints()), (int)(offsets[i].x()+9.5*factor), (int)offsets[i].y());
+				points = Integer.toString(shotList.get(0).getPoints());
+				g.drawString(points, (int)(offsets[visualPointer].x()+9.5*factor), (int)offsets[visualPointer].y());
 			}else if(this.shots.get(i).size() > 1){
-				double avgScore = Shot.avgPoints(shotList);
-				g.drawString(Double.toString(avgScore), (int)(offsets[i].x()+9.5*factor), (int)offsets[i].y());
+				points = Double.toString(Shot.avgPoints(shotList));
+				g.drawString(points, (int)(offsets[visualPointer].x()+9.5*factor), (int)offsets[visualPointer].y());
 			}
 		}
 		List<Shot> flattened = flatten(this.shots);
 		switch(this.avgMode){
 		case PERVISUAL:
 			for(int i = 0; i < this.shots.size(); i++){
-				drawDot(g, Shot.avgXY(this.shots.get(i)), offsets[i], Color.BLUE);
+				drawDot(g, Shot.avgXY(this.shots.get(i)), offsets[i%nrVisuals], Color.BLUE);
 			}
 			break;
 		case TOTAL:
@@ -156,7 +174,8 @@ public class Card{
 	
 	public void drawDot(Graphics g, Coordinate shot, Coordinate offset, Card.Color color) throws IOException{
 		BufferedImage dot = ImageIO.read(new File(String.format("%s/dot_%s.png", dotPath, color.toString())));
-		Coordinate c = shot.schale(factor).add(offset);
+		Coordinate c = Coordinate.instance(shot.x(), -shot.y());
+		c = c.schale(factor).add(offset);
 		int x = (int)c.x()-bulletSize/2;
 		int y = (int)c.y()-bulletSize/2;
 		g.drawImage(dot, x, y, bulletSize, bulletSize, null);
@@ -180,6 +199,10 @@ public class Card{
 			result.addAll(inner);
 		}
 		return result;
+	}
+	
+	public Coordinate extactOffset(Coordinate c, int offsetNr){
+		return c.subtract(this.offsets[offsetNr]);
 	}
 	
 }

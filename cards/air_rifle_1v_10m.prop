@@ -1,0 +1,14 @@
+%discipline = air_rifle_5v_10m
+bulletType = air
+weaponType = rifle
+nrVisuals = 1
+avgVisual = 0
+distanceToCard = 10 %m
+bulletSize = 20 %px
+deviation = 11 %px
+offsets.SHOTS= [152\,152]
+offsets.AVGSHOT = 152,152 
+offsets.SCORE = 280,50 
+rotations = [0]
+imgSize = 400
+textSize = 20

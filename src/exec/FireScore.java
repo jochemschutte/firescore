@@ -23,6 +23,8 @@ public class FireScore{
 			}
 			File inputFile = inputFolder.listFiles()[0];
 			File outputFolder = new File(String.format("output/%s", args[0]));
+			deleteFile(outputFolder);
+			outputFolder.mkdir();
 			Config generalConfig = Config.getConfig("configs/global");
 			Job job = new Job(inputFile, outputFolder, generalConfig);
 			System.out.println("Starting...");
@@ -41,5 +43,14 @@ public class FireScore{
 		}catch(IOException e){
 			e.printStackTrace();
 		}
+	}
+	
+	public static void deleteFile(File file) throws IOException{
+		if(file.isDirectory()){
+			for(File f : file.listFiles()){
+				deleteFile(f);
+			}
+		}
+		file.delete();
 	}
 }

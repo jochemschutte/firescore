@@ -39,14 +39,13 @@ public class Job{
 		DocInput input = io.ShotReader.read(inputFile);
 		this.discipline = input.getDiscipline();
 		this.cardConfig = Config.getConfig(String.format("cards/%s", input.getDiscipline()));
-		int imgSize = cardConfig.getInt("imgSize");
 		int nrVisuals = cardConfig.getInt("nrVisuals");
 		List<List<Shot>> read = input.getShots();
 		File cardsFolder = new File(String.format("%s/cards", outputFolder.getAbsolutePath()));
 		cardsFolder.mkdirs();
 		int i = 1;
 		for(List<Shot> shots : read){ 
-			Card card = getCard(model.cards.Card.AVGMode.TOTAL, cardConfig, imgSize);
+			Card card = getCard(model.cards.Card.AVGMode.TOTAL, cardConfig);
 			card.setShotsInSequence(shots);
 			File outputFile = new File(String.format("%s/cards/%s_%d.png", outputFolder.getAbsolutePath(), input.getDiscipline(), i));
 			card.draw(outputFile);
@@ -55,13 +54,13 @@ public class Job{
 		List<List<Shot>> flipped = flipLists(read);
 		List<List<Shot>> flattened = flatten(flipped, cardConfig.getInt("nrVisuals"));
 		if(hasMultipleVisualsWithShots(flattened)){
-			Card card = getCard(AVGMode.PERVISUAL, cardConfig, imgSize);
+			Card card = getCard(AVGMode.PERVISUAL, cardConfig);
 			card.setShotList(flattened);
 			card.draw(new File(String.format("%s/cards/%s_total.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
 		}else{
 			System.out.println("Average card was omitted due to only having one visual");
 		}
-		Card card = getCard(AVGMode.TOTAL, cardConfig, imgSize);
+		Card card = getCard(AVGMode.TOTAL, cardConfig);
 		card.setShotList(allInBag(cardConfig.getInt("avgVisual"), nrVisuals, flipped));
 		card.draw(new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
 	}
@@ -167,7 +166,7 @@ public class Job{
 		return result;
 	}
 	
-	public static Card getCard(Card.AVGMode mode, Config prop, int imgSize){
+	public static Card getCard(Card.AVGMode mode, Config prop){
 		String discipline = getDiscipline(prop);
 		File background = new File(String.format("cards/%s.png", discipline));
 		Map<Card.Offset, Object> offsetMap = new TreeMap<>();

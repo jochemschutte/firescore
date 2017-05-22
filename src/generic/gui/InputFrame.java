@@ -30,8 +30,7 @@ public class InputFrame extends JFrame{
 	private File imageFile;
 	private int pointer = 0;
 	private Card card;
-	private Config config;
-	private Config general;
+	private Config config;;
 	private Coordinate[] offsets;
 	private int nrVisuals;
 	private BufferedImage buffImg;
@@ -40,16 +39,15 @@ public class InputFrame extends JFrame{
 	private String discipline;
 	ShotRepo repo;
 	
-	public InputFrame(int width, int height, String discipline, ShotRepo repo) throws IOException {
+	public InputFrame(int width, int height, String discipline, Config cardConfig, ShotRepo repo) throws IOException {
 		this.width = width;
 		this.height = height;
 		this.discipline = discipline;
-		this.config = Config.getConfig("cards/" + discipline);
+		this.config = cardConfig;
 		this.offsets = Job.getCoordinates(config.getList("offsets.SHOTS"));
 		this.imageFile = new File(String.format("cards/%s.png", discipline));
-		this.buffImg = ImageIO.read(imageFile);
-		this.general = Config.getConfig("configs/global");
-		this.card = Job.getCard(AVGMode.TOTAL, this.config, general.getInt("imgSize"));
+		this.buffImg = ImageIO.read(imageFile);		
+		this.card = Job.getCard(AVGMode.TOTAL, this.config);
 		this.nrVisuals = config.getInt("nrVisuals");
 		this.scaleFactor = 1.0/(double)config.getInt("deviation");
 		this.repo = repo;
@@ -57,10 +55,10 @@ public class InputFrame extends JFrame{
 	}
 	
 	public InputFrame duplicate() throws IOException{
-		return new InputFrame(width, height, discipline, repo);
+		return new InputFrame(width, height, discipline, config, repo);
 	}
 	
-	private void init()throws IOException{
+	private void init() throws IOException{
 		ImageIcon imgIcon = new ImageIcon(getScaledImage(buffImg, width, height));
 		mainLabel = new JLabel("", imgIcon, JLabel.CENTER);
 		mainLabel.setHorizontalAlignment(JLabel.LEFT);
@@ -86,11 +84,14 @@ public class InputFrame extends JFrame{
 	
 	@Deprecated
 	public static void main(String[] args){
-		if(args.length == 0){
-			throw new IllegalStateException("No run argument was given. Should give date");
+		if(args.length < 2){
+			throw new IllegalStateException("2 arguments should be given. card type and date");
 		}
+		String cardType = args[0];
+		String date = args[1];
+		Config cardConfig = Config.getConfig(String.format("cards/%s", cardType));
 		try{
-			new InputFrame(1000, 1000, "air_rifle_5v_10m", new ShotRepo("air_rifle_5v_10m", new File(String.format("data/%s/input.csv", args[0]))));
+			new InputFrame(300, 300, cardType, cardConfig, new ShotRepo(cardType, new File(String.format("data/%s/input.csv", date))));
 		}catch(IOException e){
 			e.printStackTrace();
 		}

@@ -10,5 +10,5 @@ offsets.SHOTS= [152\,152]
 offsets.AVGSHOT = 152,152 
 offsets.SCORE = 280,50 
 rotations = [0]
-imgSize = 400
+imgSize = 302
 textSize = 20

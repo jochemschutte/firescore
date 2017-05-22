@@ -33,6 +33,9 @@ public class Coordinate{
 		return instance(this.x*factor, this.y*factor);
 	}
 	
+	/**
+	 * @return {r, angle}
+	 */
 	public double[] toPolar(){
 		double r = Math.sqrt(x*x+y*y);
 		double angle = Math.toDegrees(Math.atan(y/x));

@@ -185,6 +185,10 @@ public class Card{
 		drawDot(g, shot.getXY(), offset, color);
 	}
 	
+	public void drawString(Graphics g, String printText, Coordinate c){
+		g.drawString(printText, (int)c.x(), (int)c.y());
+	}
+	
 	public static double avg(Collection<Double> numbers){
 		double total = 0;
 		for(double num : numbers){

@@ -20,9 +20,32 @@ public class ShotRepo{
 		this.outputFile = outputFile;
 		this.newLine();
 	}
-	
+
+	public String getDiscipline() {
+		return discipline;
+	}
+
+
+	public File getOutputFile() {
+		return outputFile;
+	}
+
+
 	public void add(Shot s){
 		shotList.getLast().add(s);
+	}
+	
+	public List<Shot> getLastLine(){
+		return this.shotList.getLast();
+	}
+	
+	public Shot removeLastShot(){
+		Shot result = null;
+		if(!this.lastLineEmpty()){
+			List<Shot> inner = this.shotList.getLast();
+			result = inner.remove(inner.size() -1);
+		}
+		return result;
 	}
 	
 	public void newLine(){

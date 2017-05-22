@@ -69,8 +69,7 @@ public class ShotRepo{
 		for(List<Shot> shots : shotList){
 			List<String> ser = new LinkedList<>();
 			for(Shot shot : shots){
-				double[] polar = shot.getXY().toPolar();
-				ser.add(String.format("%f,%d", polar[0], (int)polar[1]));
+				ser.add(String.format("%f,%d", shot.getScore(), shot.getAngle()));
 			}
 			out.write(String.join(";", ser) + "\n");
 		}

@@ -17,11 +17,14 @@ import draw.generator.NumberGenerator;
 import draw.generator.StringGenerator;
 import io.DocInput;
 import model.Coordinate;
+import model.DoubleAverager;
 import model.Shot;
 import model.cards.Card;
 import model.cards.Card.AVGMode;
 
 public class Job{
+	
+	private static final String doubleBreak = "<br />&nbsp<br />";
 	
 	private String discipline;
 	private File inputFile;
@@ -78,7 +81,16 @@ public class Job{
 		card.draw(new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
 		
 		new File(String.format("%s/graphs", outputFolder.getAbsoluteFile())).mkdir();
-		drawGraph(read, new File(String.format("%s/cards/lapse.png", outputFolder.getAbsolutePath())));
+		List<Double> scoreList = listScores(read);
+		drawGraph(scoreList, new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath())));
+		
+		List<Double> avgScoreList = new DoubleAverager(globalConfig.getInt("graphAvgReach")).runDoubles(scoreList);
+		if(avgScoreList.size() > 1){
+			drawGraph(avgScoreList, new File(String.format("%s/graphs/avglapse.png", outputFolder.getAbsolutePath())));
+		}else{
+			System.out.println(String.format("Average lapse omitted due to only having %d average shot", avgScoreList.size()));
+		}
+		
 	}
 	
 	public static boolean hasMultipleVisualsWithShots(List<List<Shot>> shots){
@@ -103,19 +115,23 @@ public class Job{
 		return result;
 	}
 	
-	private void drawGraph(List<List<Shot>> shots, File outputFile) throws IOException{
-		
+	private List<Double> listScores(List<List<Shot>> shots){
 		List<Double> flatScores = new LinkedList<>();
 		for(List<Shot> inner : shots){
 			for(Shot s : inner){
 				flatScores.add(s.getScore() * 1.0);
 			}
 		}
+		return flatScores;
+	}
+	
+	private void drawGraph(List<Double> shots, File outputFile) throws IOException{
+		System.out.println(String.format("Generating graph '%s'", outputFile.getName()));
 		int graphWidth = globalConfig.getInt("graphWidth");
 		int graphHeight = globalConfig.getInt("graphHeight");
 		StringGenerator xScale = new NumberGenerator(1,1);
 		LineGraph graph = new LineGraph(graphWidth, graphHeight, xScale, getYScale(), 10, 1);
-		graph.setPoints(flatScores);
+		graph.setPoints(shots);
 		LineGraph.write(graph.draw(), outputFile);
 	}
 	
@@ -129,28 +145,33 @@ public class Job{
 			File card = getCardFile(i);
 			if(card.getName().matches(".+_[0-9]+.png")){
 				out.write(card.getName().split("\\.")[0] + "<br />\n");
-				out.write(imgHtml(card) + "<br />&nbsp <br />\n");
+				out.write(cardHtml(card) + "<br />&nbsp <br />\n");
 			}
 		}
 		out.write("<hr />\n");
 		File totalCard = new File(String.format("%s/cards/%s_total.png", outputFolder.getAbsolutePath(), this.discipline));
 		if(totalCard.exists()){
 			out.write(totalCard.getName().split("\\.")[0] + "<br />\n");
-			out.write(imgHtml(totalCard) + "<br />&nbsp <br />\n");
+			out.write(cardHtml(totalCard) + doubleBreak +"\n");
 		}
 		
 		File sumCard = new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), this.discipline));
 		if(sumCard.exists()){
 			out.write(sumCard.getName().split("\\.")[0] + "<br />\n");
-			out.write(imgHtml(sumCard) + "\n");
+			out.write(cardHtml(sumCard) + "\n");
 		}
-		
-		File lapseOutput = new File(String.format("%s/grahs/lapse.png", outputFolder.getAbsolutePath()));
-		System.out.println(String.format("Generating \'%s\'.", lapseOutput.getName()));
+		File lapseOutput = new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath()));
 		out.write("<hr />\n");
 		out.write("Lapse: <br />\n");
 		out.write(graphHtml(lapseOutput));
+		out.write(doubleBreak + "\n");
 		
+		
+		File avgOutput = new File(String.format("%s/graphs/avglapse.png", outputFolder.getAbsolutePath()));
+		if(avgOutput.exists()){
+			out.write(String.format("Averages (%d shots)<br>\n", globalConfig.getInt("graphAvgReach")*2+1));
+			out.write(graphHtml(avgOutput) + "\n");
+		}
 		out.write("</font>\n</html>");
 		out.flush();
 		out.close();
@@ -165,19 +186,19 @@ public class Job{
 		return String.format("<h%d>%s</h%d>", headerSize, txt, headerSize);
 	}
 	
-	private String imgHtml(File card){
+	private String cardHtml(File card){
 		int imgSize = cardConfig.getInt("imgSize");
-		return imgHtml(card, imgSize, imgSize);
+		return cardHtml(card, imgSize, imgSize);
 	}
 	
-	private String imgHtml(File img, int width, int height){
+	private String cardHtml(File img, int width, int height){
 		return String.format("<img src=\"cards/%s\" width=%d hight=%d>", img.getName(), width, height);
 	}
 	
 	private String graphHtml(File graph){
 		int width = globalConfig.getInt("graphWidth");
 		int height = globalConfig.getInt("graphHeight");
-		return imgHtml(graph, width, height);
+		return String.format("<img src=\"graphs/%s\" width=%d hight=%d>", graph.getName(), width, height);
 	}
 	
 	private static <T> List<List<T>> allInBag(int bagId, int nrVisuals, List<List<T>> list){

@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Shot{
+import model.DoubleAverager.DoubleValue;
+
+public class Shot implements DoubleValue{
 	
 	double score;
 	int angle;
@@ -56,5 +58,10 @@ public class Shot{
 			total += shot.getPoints();
 		}
 		return total;
+	}
+	
+	@Override
+	public double toDouble(){
+		return this.getScore();
 	}
 }

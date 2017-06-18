@@ -1,2 +1,3 @@
-graphWidth = 1000 %px
-graphHeight = 500 %px
+graphWidth = 800 %px
+graphHeight = 400 %px
+graphAvgReach = 2

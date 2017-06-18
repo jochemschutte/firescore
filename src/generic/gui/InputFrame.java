@@ -14,6 +14,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -296,10 +297,10 @@ public class InputFrame extends JFrame{
 		private Shot stepBack() throws IOException{
 			Shot result = null;
 			if(!repo.isEmpty()){
-				ShotRepo oldRepo = repo;
-				clear();
-				result = oldRepo.removeLastShot();
-				for(Shot s : oldRepo.getLastLine()){
+				result = repo.removeLastShot();
+				List<Shot> lastLine = repo.removeLastCard();
+				init();
+				for(Shot s : lastLine){
 					addShot(s);
 				}
 			}

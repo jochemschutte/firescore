@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import config.Config;
+import draw.LineGraph;
+import draw.generator.NumberGenerator;
+import draw.generator.StringGenerator;
 import io.DocInput;
 import model.Coordinate;
 import model.Shot;
@@ -24,10 +27,20 @@ public class Job{
 	private File inputFile;
 	private File outputFolder;
 	private Config cardConfig;
+	private Config globalConfig;
 	
-	public Job(File inputFile, File outputFolder, Config general){
+	public Job(File inputFile, File outputFolder, Config global){
 		this.inputFile = inputFile;
 		this.outputFolder = outputFolder;
+		this.globalConfig = global;
+	}
+	
+	private static List<String> getYScale(){
+		List<String> result = new LinkedList<>();
+		for(int i = 0; i <= 10; i++){
+			result.add(Integer.toString(i));
+		}
+		return result;
 	}
 	
 	public File run() throws IOException {
@@ -63,6 +76,9 @@ public class Job{
 		Card card = getCard(AVGMode.TOTAL, cardConfig);
 		card.setShotList(allInBag(cardConfig.getInt("avgVisual"), nrVisuals, flipped));
 		card.draw(new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
+		
+		new File(String.format("%s/graphs", outputFolder.getAbsoluteFile())).mkdir();
+		drawGraph(read, new File(String.format("%s/cards/lapse.png", outputFolder.getAbsolutePath())));
 	}
 	
 	public static boolean hasMultipleVisualsWithShots(List<List<Shot>> shots){
@@ -87,14 +103,20 @@ public class Job{
 		return result;
 	}
 	
-	@Deprecated
-	private static void dump(List<List<Shot>> outer){
-		for(int i = 0; i < outer.size(); i++){
-			List<Shot> inner = outer.get(i);
-			for(int j = 0; j < inner.size(); j++){
-				System.out.println(String.format("%d-%d", i, j));
+	private void drawGraph(List<List<Shot>> shots, File outputFile) throws IOException{
+		
+		List<Double> flatScores = new LinkedList<>();
+		for(List<Shot> inner : shots){
+			for(Shot s : inner){
+				flatScores.add(s.getScore() * 1.0);
 			}
 		}
+		int graphWidth = globalConfig.getInt("graphWidth");
+		int graphHeight = globalConfig.getInt("graphHeight");
+		StringGenerator xScale = new NumberGenerator(1,1);
+		LineGraph graph = new LineGraph(graphWidth, graphHeight, xScale, getYScale(), 10, 1);
+		graph.setPoints(flatScores);
+		LineGraph.write(graph.draw(), outputFile);
 	}
 	
 	private File writeHtml() throws IOException{
@@ -121,7 +143,14 @@ public class Job{
 		if(sumCard.exists()){
 			out.write(sumCard.getName().split("\\.")[0] + "<br />\n");
 			out.write(imgHtml(sumCard) + "\n");
-		}		
+		}
+		
+		File lapseOutput = new File(String.format("%s/grahs/lapse.png", outputFolder.getAbsolutePath()));
+		System.out.println(String.format("Generating \'%s\'.", lapseOutput.getName()));
+		out.write("<hr />\n");
+		out.write("Lapse: <br />\n");
+		out.write(graphHtml(lapseOutput));
+		
 		out.write("</font>\n</html>");
 		out.flush();
 		out.close();
@@ -138,7 +167,17 @@ public class Job{
 	
 	private String imgHtml(File card){
 		int imgSize = cardConfig.getInt("imgSize");
-		return String.format("<img src=\"cards/%s\" width=%d hight=%d>", card.getName(), imgSize, imgSize);
+		return imgHtml(card, imgSize, imgSize);
+	}
+	
+	private String imgHtml(File img, int width, int height){
+		return String.format("<img src=\"cards/%s\" width=%d hight=%d>", img.getName(), width, height);
+	}
+	
+	private String graphHtml(File graph){
+		int width = globalConfig.getInt("graphWidth");
+		int height = globalConfig.getInt("graphHeight");
+		return imgHtml(graph, width, height);
 	}
 	
 	private static <T> List<List<T>> allInBag(int bagId, int nrVisuals, List<List<T>> list){

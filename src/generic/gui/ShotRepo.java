@@ -48,6 +48,15 @@ public class ShotRepo{
 		return result;
 	}
 	
+	public List<Shot> removeLastCard(){
+		List<Shot> result = new LinkedList<>();
+		if(!this.lastLineEmpty()){
+			result = this.shotList.removeLast();
+			this.shotList.add(new LinkedList<>());
+		}
+		return result;
+	}
+	
 	public void newLine(){
 		if(shotList.size() == 0 || !lastLineEmpty()){
 			shotList.add(new LinkedList<>());
@@ -60,6 +69,14 @@ public class ShotRepo{
 	
 	public boolean isEmpty(){
 		return shotList.size() == 0 || (shotList.size() == 1 && lastLineEmpty());
+	}
+	
+	public int size(){
+		int size = 0;
+		for(List<Shot> inner: shotList){
+			size += inner.size();
+		}
+		return size;
 	}
 	
 	public void persist() throws IOException{

@@ -1,5 +1,6 @@
 package exec;
 
+import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -12,7 +13,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import config.Config;
-import draw.LineGraph;
+import draw.BufferedLineGraph;
 import draw.generator.NumberGenerator;
 import draw.generator.StringGenerator;
 import io.DocInput;
@@ -82,14 +83,17 @@ public class Job{
 		
 		new File(String.format("%s/graphs", outputFolder.getAbsoluteFile())).mkdir();
 		List<Double> scoreList = listScores(read);
-		drawGraph(scoreList, new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath())));
+		System.out.println("generating lapse");
+		BufferedLineGraph g = initGraph(scoreList.size());
+		g.draw(scoreList, Color.BLACK);
 		
 		List<Double> avgScoreList = new DoubleAverager(globalConfig.getInt("graphAvgReach")).runDoubles(scoreList);
 		if(avgScoreList.size() > 1){
-			drawGraph(avgScoreList, new File(String.format("%s/graphs/avglapse.png", outputFolder.getAbsolutePath())));
+			g.draw(avgScoreList, Color.BLUE);
 		}else{
 			System.out.println(String.format("Average lapse omitted due to only having %d average shot", avgScoreList.size()));
 		}
+		g.write(new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath())));
 		
 	}
 	
@@ -125,14 +129,12 @@ public class Job{
 		return flatScores;
 	}
 	
-	private void drawGraph(List<Double> shots, File outputFile) throws IOException{
-		System.out.println(String.format("Generating graph '%s'", outputFile.getName()));
+	private BufferedLineGraph initGraph(int nrXValues) throws IOException{
 		int graphWidth = globalConfig.getInt("graphWidth");
 		int graphHeight = globalConfig.getInt("graphHeight");
 		StringGenerator xScale = new NumberGenerator(1,1);
-		LineGraph graph = new LineGraph(graphWidth, graphHeight, xScale, getYScale(), 10, 1);
-		graph.setPoints(shots);
-		LineGraph.write(graph.draw(), outputFile);
+		BufferedLineGraph graph = new BufferedLineGraph(graphWidth, graphHeight, xScale, nrXValues, getYScale(), 10, 1);
+		return graph;
 	}
 	
 	private File writeHtml() throws IOException{

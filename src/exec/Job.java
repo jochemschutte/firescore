@@ -86,13 +86,13 @@ public class Job{
 		List<Double> scoreList = listScores(shotList);
 		System.out.println("generating lapse");
 		BufferedLineGraph g = initGraph(scoreList.size());
-		g.drawHrule(Shot.avgPoints(shotList), Color.RED);
+		g.drawHrule(Shot.avgPoints(shotList), Color.RED, 1);
 		
-		g.draw(scoreList, Color.BLACK);
+		g.draw(scoreList, Color.BLACK, 1);
 		
 		List<Double> avgScoreList = new DoubleAverager(globalConfig.getInt("graphAvgReach")).runDoubles(scoreList);
 		if(avgScoreList.size() > 1){
-			g.draw(avgScoreList, Color.BLUE);
+			g.draw(avgScoreList, Color.BLUE, 2);
 		}else{
 			System.out.println(String.format("Average lapse omitted due to only having %d average shot", avgScoreList.size()));
 		}

@@ -20,7 +20,7 @@ public class BufferedLineGraph{
 	
 	public static final double borderFactor = 0.05;
 	public static final double axisLineFactor = 0.01;
-	private static final Stroke GRAPH_STROKE = new BasicStroke(1);
+	private static final Stroke BACKGROUND_STROKE = new BasicStroke(1);
 	private static final Stroke GRAPH_DASHED = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{9}, 0);
 	
 	private int height;
@@ -53,7 +53,7 @@ public class BufferedLineGraph{
 		this.canvas = (Graphics2D) result.getGraphics();
 		canvas.setColor(Color.WHITE);
 		canvas.fillRect(0, 0, width, height);
-		canvas.setStroke(GRAPH_STROKE);
+		canvas.setStroke(BACKGROUND_STROKE);
 		canvas.setColor(Color.BLACK);
 		drawScaleX(canvas);
 		drawScaleY(canvas);
@@ -68,20 +68,15 @@ public class BufferedLineGraph{
 		this.width = width;
 	}
 	
-	public void drawHrule(double yValue, Color color){
-		canvas.setColor(color);
-		drawLine(canvas, 0, yValue, this.nrXValues, yValue);
-		canvas.setColor(Color.white);
+	public void drawHrule(double yValue, Color color, int stroke){
+		drawLine(canvas, 0, yValue, this.nrXValues, yValue, color, stroke);
 	}
 	
-	public void drawVrule(int xValue, Color color){
-		canvas.setColor(color);
-		drawLine(canvas, xValue, 0.0, xValue, this.maxYValue);
-		canvas.setColor(Color.white);
+	public void drawVrule(int xValue, Color color, int stroke){
+		drawLine(canvas, xValue, 0.0, xValue, this.maxYValue, color, stroke);
 	}
 	
-	public void draw(List<Double> points, java.awt.Color color){
-		canvas.setColor(color);
+	public void draw(List<Double> points, java.awt.Color color, int stroke){
 		Iterator<Double> iter = points.iterator();
 		if(iter.hasNext()){
 			Double prev = iter.next();
@@ -89,13 +84,12 @@ public class BufferedLineGraph{
 			while(iter.hasNext()){
 				Double next = iter.next();
 				if(next != null){
-					drawLine(canvas, i-1, prev, i, next);
+					drawLine(canvas, i-1, prev, i, next, color, stroke);
 					prev = next;
 				}
 				i++;
 			}
 		}
-		canvas.setColor(Color.WHITE);
 	}
 	
 	public void write(File outputFile) throws IOException{
@@ -125,7 +119,7 @@ public class BufferedLineGraph{
 			g.drawLine(xBorder, y, xBorder+yLineLength, y);
 			g.setStroke(GRAPH_DASHED);
 			g.drawLine(xBorder, y, width-xBorder, y);
-			g.setStroke(GRAPH_STROKE);
+			g.setStroke(BACKGROUND_STROKE);
 			if(yValues.hasNext()){
 				String yValue = yValues.next();
 				FontRenderContext frc = new FontRenderContext(new AffineTransform(),true,true);
@@ -137,12 +131,16 @@ public class BufferedLineGraph{
 		return g;
 	}
 	
-	private Graphics2D drawLine(Graphics2D g, int x1, Double y1, int x2, Double y2){
+	private Graphics2D drawLine(Graphics2D g, int x1, Double y1, int x2, Double y2, Color color, int stroke){
 		int iy1 = yScaleToCanvas(y1);
 		int iy2 = yScaleToCanvas(y2);
 		int ix1 = xScaleToCanvas(x1);
 		int ix2 = xScaleToCanvas(x2);
+		g.setColor(color);
+		g.setStroke(new BasicStroke(stroke));
 		g.drawLine(ix1, iy1, ix2, iy2);
+		g.setColor(Color.WHITE);
+		g.setStroke(BACKGROUND_STROKE);
 		return g;
 	}
 	

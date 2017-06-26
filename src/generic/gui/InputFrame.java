@@ -161,11 +161,15 @@ public class InputFrame extends JFrame{
 				System.exit(0);
 			}
 		}else{
-			if(!repo.isEmpty() && !debugMode){
-				try{
-					repo.persist();
-				}catch(IOException exc){
-					exc.printStackTrace();
+			if(!debugMode){
+				if(!repo.isEmpty()){
+					try{
+						repo.persist();
+					}catch(IOException exc){
+						exc.printStackTrace();
+					}
+				}else{
+					System.out.println("No data entered. did not persist");
 				}
 			}else{
 				System.out.println("Did not persist due to debug mode");
@@ -197,7 +201,10 @@ public class InputFrame extends JFrame{
 		try{
 			System.out.println("Starting...");
 			InputFrame f = new InputFrame(cardSize, cardSize, cardType, cardConfig, new ShotRepo(cardType, new File(String.format("data/%s/input.csv", date))));
-			f.setDebugMode(args.length >= 3 && args[2].equals("-D"));
+			if(args.length >= 3 && args[2].equals("-D")){
+				f.setDebugMode(true);
+				System.out.println("Debug mode enabled");
+			}
 		}catch(IOException e){
 			e.printStackTrace();
 		}

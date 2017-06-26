@@ -32,9 +32,10 @@ import model.cards.Card.AVGMode;
 
 public class InputFrame extends JFrame{
 	
-	public static double moveDelta = 0.1;
+	public static double moveScoreDelta = 0.1;
+	public static int moveAngleDelta = 2;
 	
-	public enum Move {UP, DOWN};
+	public enum Move {UP, DOWN, LEFT, RIGHT};
 	
 	private static final long serialVersionUID = 1L;
 	private int width;
@@ -54,6 +55,7 @@ public class InputFrame extends JFrame{
 	private int textSize;
 	private int nextScoreHeight;
 	private KeyProcessQue que;
+	private boolean debugMode = false;
 	ShotRepo repo;
 	
 	public InputFrame(int width, int height, String discipline, Config cardConfig, ShotRepo repo) throws IOException {
@@ -76,6 +78,10 @@ public class InputFrame extends JFrame{
 		this.addKeyListener(que);
 		this.addKeyListener(new InputFrameKeyListener(que));
 		this.addWindowListener(new InputFrameWindowListener());
+	}
+	
+	public void setDebugMode(boolean d){
+		this.debugMode = d;
 	}
 	
 	public void setKeyProcessQue(KeyProcessQue que){
@@ -148,19 +154,23 @@ public class InputFrame extends JFrame{
 		if(!repo.lastLineEmpty()){
 			repo.newLine();
 			try{
-				duplicate();
+				InputFrame f = duplicate();
+				f.setDebugMode(debugMode);				
 			}catch(IOException exc){
 				exc.printStackTrace();
 				System.exit(0);
 			}
 		}else{
-			if(!repo.isEmpty()){
+			if(!repo.isEmpty() && !debugMode){
 				try{
 					repo.persist();
 				}catch(IOException exc){
 					exc.printStackTrace();
 				}
+			}else{
+				System.out.println("Did not persist due to debug mode");
 			}
+			System.out.println("_Finished");
 			System.exit(0);
 		}
 		this.setVisible(false);
@@ -176,7 +186,6 @@ public class InputFrame extends JFrame{
 	    return resizedImg;
 	}
 	
-	@Deprecated
 	public static void main(String[] args){
 		if(args.length < 2){
 			throw new IllegalStateException("2 arguments should be given. card type and date");
@@ -186,7 +195,9 @@ public class InputFrame extends JFrame{
 		Config cardConfig = Config.getConfig(String.format("cards/%s", cardType));
 		int cardSize = cardConfig.getInt("imgSize");
 		try{
-			new InputFrame(cardSize, cardSize, cardType, cardConfig, new ShotRepo(cardType, new File(String.format("data/%s/input.csv", date))));
+			System.out.println("Starting...");
+			InputFrame f = new InputFrame(cardSize, cardSize, cardType, cardConfig, new ShotRepo(cardType, new File(String.format("data/%s/input.csv", date))));
+			f.setDebugMode(args.length >= 3 && args[2].equals("-D"));
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -276,6 +287,12 @@ public class InputFrame extends JFrame{
 					case KeyEvent.VK_DOWN:
 						move(Move.DOWN);
 						break;
+					case KeyEvent.VK_LEFT:
+						move(Move.LEFT);
+						break;
+					case KeyEvent.VK_RIGHT:
+						move(Move.RIGHT);
+						break;
 					case KeyEvent.VK_W:
 						if(que.process(KeyEvent.VK_W)){
 							closeCard();
@@ -311,15 +328,21 @@ public class InputFrame extends JFrame{
 			Shot lastShot = stepBack();
 			if(lastShot != null){
 				double score = lastShot.getScore();
+				int angle = lastShot.getAngle();
 				switch(move){
 				case UP:
-					score += moveDelta;
+					score =  Math.min(10.0, score+moveScoreDelta);
 					break;
 				case DOWN:
-					score -= moveDelta;
+					score -= moveScoreDelta;
 					break;
+				case LEFT:
+					angle = (angle-moveAngleDelta) % 360;
+					break;
+				case RIGHT:
+					angle = (angle+moveAngleDelta) % 360;
 				}
-				addShot(new Shot(score, lastShot.getAngle()));				
+				addShot(new Shot(score, angle));				
 			}
 		}
 	}

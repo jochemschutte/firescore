@@ -119,7 +119,7 @@ public class Job{
 		List<Double> flatScores = new LinkedList<>();
 		for(List<Shot> inner : shots){
 			for(Shot s : inner){
-				flatScores.add(s.getScore() * 1.0);
+				flatScores.add(s.getPoints() * 1.0);
 			}
 		}
 		return flatScores;

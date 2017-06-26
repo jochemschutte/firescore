@@ -68,7 +68,19 @@ public class BufferedLineGraph{
 		this.width = width;
 	}
 	
-	public BufferedImage draw(List<Double> points, java.awt.Color color){
+	public void drawHrule(double yValue, Color color){
+		canvas.setColor(color);
+		drawLine(canvas, 0, yValue, this.nrXValues, yValue);
+		canvas.setColor(Color.white);
+	}
+	
+	public void drawVrule(int xValue, Color color){
+		canvas.setColor(color);
+		drawLine(canvas, xValue, 0.0, xValue, this.maxYValue);
+		canvas.setColor(Color.white);
+	}
+	
+	public void draw(List<Double> points, java.awt.Color color){
 		canvas.setColor(color);
 		Iterator<Double> iter = points.iterator();
 		if(iter.hasNext()){
@@ -84,7 +96,6 @@ public class BufferedLineGraph{
 			}
 		}
 		canvas.setColor(Color.WHITE);
-		return result;
 	}
 	
 	public void write(File outputFile) throws IOException{
@@ -93,7 +104,6 @@ public class BufferedLineGraph{
 	
 	private Graphics2D drawScaleX(Graphics2D g){
 		int x = xBorder;
-		System.out.println(x);
 		int xLineLength = (int)(height*axisLineFactor);
 		int xStep = (width - xBorder*2)/(this.nrXValues-1);
 		g.drawLine(xBorder, height-yBorder, width-xBorder, height-yBorder);

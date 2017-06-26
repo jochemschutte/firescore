@@ -82,9 +82,12 @@ public class Job{
 		card.draw(new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), input.getDiscipline())));
 		
 		new File(String.format("%s/graphs", outputFolder.getAbsoluteFile())).mkdir();
-		List<Double> scoreList = listScores(read);
+		List<Shot> shotList = listShots(read);
+		List<Double> scoreList = listScores(shotList);
 		System.out.println("generating lapse");
 		BufferedLineGraph g = initGraph(scoreList.size());
+		g.drawHrule(Shot.avgPoints(shotList), Color.RED);
+		
 		g.draw(scoreList, Color.BLACK);
 		
 		List<Double> avgScoreList = new DoubleAverager(globalConfig.getInt("graphAvgReach")).runDoubles(scoreList);
@@ -93,6 +96,7 @@ public class Job{
 		}else{
 			System.out.println(String.format("Average lapse omitted due to only having %d average shot", avgScoreList.size()));
 		}
+		
 		g.write(new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath())));
 		
 	}
@@ -119,12 +123,18 @@ public class Job{
 		return result;
 	}
 	
-	private List<Double> listScores(List<List<Shot>> shots){
+	private List<Shot> listShots(List<List<Shot>> shots){
+		List<Shot> result = new LinkedList<>();
+		for(List<Shot> inner: shots){
+			result.addAll(inner);
+		}
+		return result;
+	}
+	
+	private List<Double> listScores(List<Shot> shots){
 		List<Double> flatScores = new LinkedList<>();
-		for(List<Shot> inner : shots){
-			for(Shot s : inner){
-				flatScores.add(s.getPoints() * 1.0);
-			}
+		for(Shot s : shots){
+			flatScores.add(s.getPoints() * 1.0);
 		}
 		return flatScores;
 	}

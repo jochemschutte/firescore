@@ -97,14 +97,16 @@ public class BufferedLineGraph{
 	}
 	
 	private Graphics2D drawScaleX(Graphics2D g){
-		int x = xBorder;
+		double xDouble = xBorder;
 		int xLineLength = (int)(height*axisLineFactor);
-		int xStep = (width - xBorder*2)/(this.nrXValues-1);
+		double xStep = (width - (double)xBorder*2)/(double)(this.nrXValues-1);
 		g.drawLine(xBorder, height-yBorder, width-xBorder, height-yBorder);
-		while(x <= width-xBorder){
-			g.drawLine(x, height-yBorder-xLineLength, x, height-yBorder);
-			g.drawString(xScale.next(), x-3, height-yBorder+3*xLineLength);
-			x += xStep;
+		while(xDouble < width-xBorder){
+			int xInt = (int)xDouble;
+			g.drawLine(xInt, height-yBorder-xLineLength, xInt, height-yBorder);
+			String textLabel = xScale.next();
+			g.drawString(textLabel, xInt-textLabel.length()*4, height-yBorder+3*xLineLength);
+			xDouble += xStep;
 		}
 		return g;
 	}

@@ -44,7 +44,7 @@ public abstract class ArgParser{
 
 	public Map<String, Option> parse(String input) throws IllegalArgumentException{
 		List<String> args = split(input);
-		if(args.get(0).equals("--help")){
+		if(args.size() > 0 && args.get(0).equals("--help")){
 			System.out.println(this.getDescription());
 			System.exit(0);
 		}

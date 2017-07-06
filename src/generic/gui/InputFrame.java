@@ -190,25 +190,6 @@ public class InputFrame extends JFrame{
 	    return resizedImg;
 	}
 	
-	public static void main(String[] args){
-		if(args.length < 2){
-			throw new IllegalStateException("2 arguments should be given. card type and date");
-		}
-		String cardType = args[0];
-		String date = args[1];
-		Config cardConfig = Config.getConfig(String.format("cards/%s", cardType));
-		int cardSize = cardConfig.getInt("imgSize");
-		try{
-			System.out.println("Starting...");
-			InputFrame f = new InputFrame(cardSize, cardSize, cardType, cardConfig, new ShotRepo(cardType, new File(String.format("data/%s/input.csv", date))));
-			if(args.length >= 3 && args[2].equals("-D")){
-				f.setDebugMode(true);
-				System.out.println("Debug mode enabled");
-			}
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-	}
 	
 	public class InputFrameMouseListener extends MouseAdapter{
 		

@@ -4,32 +4,37 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.TreeMap;
 
 public abstract class ArgParser{
 
-	protected abstract Stack<String> getArgStack();
-	protected abstract Map<String, Integer> getArgList();
-	protected abstract Map<Integer, String> getDescrList();
-	protected abstract Map<Integer, Boolean> getManditoryList(); 
 	protected abstract void checkArguments(Map<String, Option> arguments) throws IllegalArgumentException;
+
+	private LinkedList<String> argStack = new LinkedList<>();
+	private Map<String, Option> options = new TreeMap<>();
+	
+	private Map<String, Option> getOptions(){
+		return this.options;
+	}
+
+	private LinkedList<String> getArgStack(){
+		return this.argStack;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public String getDescription(){
 		String header = "";
 		List<String> result = new LinkedList<>();
 		result.add("--help\t\tdisplays this help menu\n");
-		Stack<String> copy = (Stack<String>)getArgStack().clone();
+		LinkedList<String> copy = (LinkedList<String>)getArgStack().clone();
 		while(copy.size() > 0){
 			String key = copy.pop();
-			int id = getArgList().get(key);
 			String format = "%s ";
-			if(!getManditoryList().get(id)){
+			if(!getOptions().get(key).isManditory()){
 				format = "[%s] ";
 			}
 			header += String.format(format, key);
-			result.add(key +"\t\t"+getDescrList().get(id));
+			result.add(key +"\t\t"+getOptions().get(key).getDescription());
 		}
 		return String.format("%s\n\n%s", header, String.join("\n", result));
 	}
@@ -43,38 +48,47 @@ public abstract class ArgParser{
 	}
 
 	public Map<String, Option> parse(String input) throws IllegalArgumentException{
+		Map<String, Option> result = getOptions();
 		List<String> args = split(input);
 		if(args.size() > 0 && args.get(0).equals("--help")){
 			System.out.println(this.getDescription());
 			System.exit(0);
 		}
-		Map<String, Option> result = new TreeMap<>();
 		for(String arg : args){
 			String[] parts = arg.split("=");
 			if(arg.startsWith("--")){
-				String key = arg.substring(2);
-				if(key.length() < 1){
-					throw new IllegalArgumentException("'--' is not a valid argument");
+				if(arg.length() < 3 || !result.containsKey(arg.substring(2))){
+					throwKeyNotFound(arg);
 				}
-				result.put(key, new Option(key, "true"));
+				result.get(arg.substring(2)).setValue("true");
 			}else if(arg.startsWith("-")){
 				if(arg.length() < 2){
-					throw new IllegalArgumentException("'-' is not a valid flag");
+					throwKeyNotFound("-");
 				}
 				for(char c : arg.substring(1).toCharArray()){
 					String key = Character.toString(c);
-					result.put(key, new Option(key, "true"));
+					if(!result.containsKey(key)){
+						throwKeyNotFound(String.format("-%s", key));
+					}
+					getOptions().get(key).setValue("true");
 				}
 			}else if(parts.length > 1){
 				String[] valueParts = java.util.Arrays.copyOfRange(parts, 1, parts.length);
-				result.put(parts[0], new Option(parts[0], String.join("=", valueParts)));
+				if(!result.containsKey(valueParts[0])){
+					throwKeyNotFound(valueParts[0]);
+				}
+				getOptions().get(parts[0]).setValue(String.join("=", valueParts));
 			}else{
 				String key = getNextArgument();
-				result.put(key, new Option(key, arg));
+				getOptions().get(key).setValue(arg);
 			}
 		}
-		this.checkArguments(result);
-		return result;
+		this.checkArguments(getOptions());
+		return getOptions();
+	}
+	
+	private void throwKeyNotFound(String key) throws IllegalArgumentException{
+		throw new IllegalArgumentException(String.format("Option '%s' is not recognised. type '--help' for all options", key));
 	}
 	
 	private List<String> split(String line){
@@ -119,6 +133,11 @@ public abstract class ArgParser{
 			result += next;
 		}
 		return result;
+	}
+	
+	protected void putOption(String key, String description, boolean manditory){
+		argStack.add(key);
+		getOptions().put(key, new Option(key, description, manditory));
 	}
 	
 	private Iterator<Character> toCharStream(String line){

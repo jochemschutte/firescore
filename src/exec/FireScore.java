@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
-import java.util.Stack;
-import java.util.TreeMap;
 
 import config.Config;
 import exec.executable.Option;
@@ -22,14 +20,14 @@ public class FireScore{
 		try{
 			File htmlFile = null;
 			Config generalConfig = Config.getConfig("configs/global");
-			if(arguments.containsKey(ALLOPTION)){
+			if(arguments.get(ALLOPTION).isSet()){
 				File dataFolder = new File("data");
 				for(File inputFolder : dataFolder.listFiles()){
 					generate(inputFolder.getName(), generalConfig);
 				}
 				System.out.println("_Finished generating all.");
 				System.out.println("Will not open due to mass generation");
-			}else if(!arguments.containsKey(OPENONLYOPTION) || !arguments.get(OPENONLYOPTION).asBoolean()){
+			}else if(!arguments.get(OPENONLYOPTION).isSet()){
 				htmlFile = generate(arguments.get("date").getValue(), generalConfig);
 				openHTML(htmlFile);
 			}else{
@@ -80,60 +78,25 @@ public class FireScore{
 	}
 	
 	private static class FireScoreParser extends exec.executable.ArgParser{
-
-		private Stack<String> argStack;
-		private Map<String, Integer> argList;
-		private Map<Integer, String> descrList;
-		private Map<Integer, Boolean> manditoryList;
 		
 		public FireScoreParser(){
-			argStack = new Stack<>();
-			argList = new TreeMap<>();
-			descrList = new TreeMap<>();
-			manditoryList = new TreeMap<>();
-			argStack.push("--all");
-			argStack.push("-o");
-			argStack.push("date");
-			argList.put("date", 0);
-			argList.put("-o", 1);
-			argList.put("--all", 2);
-			descrList.put(0, "The date the series was shot");
-			descrList.put(1, "Only open the previously rendered document");
-			descrList.put(2, "Generate all data sources");
-			manditoryList.put(0, true);
-			manditoryList.put(1, false);
-			manditoryList.put(2, false);
-		}
-		
-		@Override
-		protected Stack<String> getArgStack() { 
-			return this.argStack;
-		}
-
-		@Override
-		protected Map<String, Integer> getArgList() {
-			return this.argList;
-		}
-
-		@Override
-		protected Map<Integer, String> getDescrList() {
-			return this.descrList;
-		}
-
-		@Override
-		protected Map<Integer, Boolean> getManditoryList() {
-			return this.manditoryList;
+			this.putOption("date", "The date the series was shot", true);
+			this.putOption("o", "Only open the previously rendered document", false);
+			this.putOption("all", "Generate all data sources", false);
 		}
 
 		@Override
 		protected void checkArguments(Map<String, Option> args) throws IllegalArgumentException {
-			if(args.containsKey("date")){
+			if(args.get("date").isSet()){
 				String date = args.get("date").getValue();
+				if(date.matches(".*[.\\/].*")){
+					throw new IllegalArgumentException("date cannot contain special characters like \"./\\\". Stop trying to hack my software!");
+				}
 				File inputFolder = new File(String.format("data/%s", date));
 				if(!inputFolder.exists()){
 					throw new IllegalArgumentException(String.format("no data folder found with date '%s'", date));
 				}
-			}else if(!args.containsKey(ALLOPTION)){
+			}else if(!args.get(ALLOPTION).isSet()){
 				throw new IllegalArgumentException("no 'date' argument given");
 			}
 		}

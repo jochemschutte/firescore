@@ -3,11 +3,15 @@ package exec.executable;
 public class Option{
 	
 	String key;
-	String value;
+	String value = null;
+	String description;
+	boolean set;
+	boolean manditory;
 	
-	public Option(String key, String value){
+	public Option(String key, String description, boolean manditory){
 		this.key = key;
-		this.value = value;
+		this.description = description;
+		this.manditory = manditory;
 	}
 
 	public String getKey(){
@@ -16,6 +20,11 @@ public class Option{
 	
 	public String getValue(){
 		return this.value;
+	}
+	
+	public void setValue(String value){
+		this.value = value;
+		this.set = true;
 	}
 	
 	public int asInt(){
@@ -42,5 +51,27 @@ public class Option{
 		}
 		return false;
 	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public boolean isSet() {
+		return set;
+	}
+
+	public boolean isManditory() {
+		return manditory;
+	}
+
+	public void setManditory(boolean manditory) {
+		this.manditory = manditory;
+	}
+	
+	
 }
 	

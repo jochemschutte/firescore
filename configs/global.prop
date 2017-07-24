@@ -1,3 +1,4 @@
 graphWidth = 800 %px
 graphHeight = 400 %px
 graphAvgReach = 2
+barGraphStep = 1

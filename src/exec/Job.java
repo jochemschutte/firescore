@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import config.Config;
+import draw.BarGraph;
 import draw.BufferedLineGraph;
 import draw.generator.NumberGenerator;
 import draw.generator.StringGenerator;
@@ -85,20 +86,46 @@ public class Job{
 		List<Shot> shotList = listShots(read);
 		List<Double> scoreList = listScores(shotList);
 		System.out.println("generating lapse");
-		BufferedLineGraph g = initGraph(scoreList.size());
-		g.drawHrule(Shot.avgPoints(shotList), Color.RED, 1);
+		BufferedLineGraph lg = initLineGraph(scoreList.size());
+		lg.drawHrule(Shot.avgPoints(shotList), Color.RED, 1);
 		
-		g.draw(scoreList, Color.BLACK, 1);
+		lg.draw(scoreList, Color.BLACK, 1);
 		
 		List<Double> avgScoreList = new DoubleAverager(globalConfig.getInt("graphAvgReach")).runDoubles(scoreList);
 		if(avgScoreList.size() > 1){
-			g.draw(avgScoreList, Color.BLUE, 2);
+			lg.draw(avgScoreList, Color.BLUE, 2);
 		}else{
 			System.out.println(String.format("Average lapse omitted due to only having %d average shot", avgScoreList.size()));
 		}
 		
-		g.write(new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath())));
+		lg.write(new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath())));
 		
+		System.out.println("Generating score count graph");
+		BarGraph bg = initBarGraph();
+		bg.setValues(getIntList(10), countScores(shotList));
+		bg.draw(Color.BLUE);
+		bg.write(new File(String.format("%s/graphs/count.png", outputFolder.getAbsolutePath())));
+		
+	}
+	
+	private static List<String> getIntList(int maxValue){
+		List<String> result = new LinkedList<>();
+		for(int i = 1; i <= maxValue; i++){
+			result.add(Integer.toString(i));
+		}
+		return result;
+	}
+	
+	private static Map<String, Double> countScores(Iterable<Shot> shots){
+		Map<String, Double> result = new TreeMap<>();
+		for(int i = 0; i <= 10; i++){
+			result.put(Integer.toString(i), 0.0);
+		}
+		for(Shot shot : shots){
+			String points = Integer.toString(shot.getPoints());
+			result.put(points, result.get(points)+1);
+		}
+		return result;
 	}
 	
 	public static boolean hasMultipleVisualsWithShots(List<List<Shot>> shots){
@@ -139,12 +166,16 @@ public class Job{
 		return flatScores;
 	}
 	
-	private BufferedLineGraph initGraph(int nrXValues) throws IOException{
+	private BufferedLineGraph initLineGraph(int nrXValues) throws IOException{
 		int graphWidth = globalConfig.getInt("graphWidth");
 		int graphHeight = globalConfig.getInt("graphHeight");
 		StringGenerator xScale = new NumberGenerator(1,1);
 		BufferedLineGraph graph = new BufferedLineGraph(graphWidth, graphHeight, xScale, nrXValues, getYScale(), 10, 1);
 		return graph;
+	}
+	
+	private BarGraph initBarGraph(){
+		return new BarGraph(globalConfig.getInt("graphWidth"), globalConfig.getInt("graphHeight"), globalConfig.getInt("barGraphStep"));
 	}
 	
 	private File writeHtml() throws IOException{
@@ -184,6 +215,11 @@ public class Job{
 			out.write(String.format("Averages (%d shots)<br>\n", globalConfig.getInt("graphAvgReach")*2+1));
 			out.write(graphHtml(avgOutput) + "\n");
 		}
+		
+		File countGraph = new File(String.format("%s/graphs/count.png", outputFolder.getAbsolutePath()));
+		out.write("<hr />\n");
+		out.write("Shots counted: <br />\n");
+		out.write(graphHtml(countGraph) + "\n");
 		out.write("</font>\n</html>");
 		out.flush();
 		out.close();

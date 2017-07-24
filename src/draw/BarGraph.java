@@ -113,7 +113,7 @@ public class BarGraph{
 	
 	public Graphics2D draw(Color color){
 		this.init();
-		int xWidth = (int)((width-2*xBorder)/(yValues.size()-1));
+		int xWidth = (int)((width-2*xBorder)/(xValues.size()));
 		double yHeight = (height-2*yBorder)/this.yMax;
 		int i = 0;
 		FontRenderContext frc = new FontRenderContext(new AffineTransform(),true,true);

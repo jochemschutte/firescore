@@ -110,7 +110,7 @@ public class Job{
 	
 	private static List<String> getIntList(int maxValue){
 		List<String> result = new LinkedList<>();
-		for(int i = 1; i <= maxValue; i++){
+		for(int i = 0; i <= maxValue; i++){
 			result.add(Integer.toString(i));
 		}
 		return result;

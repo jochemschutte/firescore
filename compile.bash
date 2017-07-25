@@ -15,6 +15,10 @@ echo Main-Class: generic.gui.ShotInput > manifest.txt
 jar cvfm ../Input.jar manifest.txt @bin.txt
 echo "_compiling Input.jar"
 
+echo Main-Class: move.Move > manifest.txt
+jar cvfm ../Move.jar manifest.txt @bin.txt
+echo "_compiling Move.jar"
+
 rm manifest.txt
 rm bin.txt
 echo "_finished!"

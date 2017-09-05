@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -59,6 +61,8 @@ public class InputFrame extends JFrame{
 	private double bulletSize;
 	private double shotDelta;
 	ShotRepo repo;
+	public Lock lock = new ReentrantLock();
+	
 	
 	public InputFrame(int width, int height, String discipline, Config cardConfig, ShotRepo repo) throws IOException {
 		this.width = width;
@@ -317,26 +321,33 @@ public class InputFrame extends JFrame{
 		}
 		
 		private void move(Move move) throws IOException{
-			Shot lastShot = stepBack();
-			if(lastShot != null){
-				double score = lastShot.getScore();
-				int angle = lastShot.getAngle();
-				switch(move){
-				case UP:
-					score =  Math.min(10.0, score+moveScoreDelta);
-					break;
-				case DOWN:
-					score -= moveScoreDelta;
-					break;
-				case LEFT:
-					angle = (angle-moveAngleDelta) % 360;
-					break;
-				case RIGHT:
-					angle = (angle+moveAngleDelta) % 360;
+			if(lock.tryLock()){
+				try{
+					Shot lastShot = stepBack();
+					if(lastShot != null){
+						double score = lastShot.getScore();
+						int angle = lastShot.getAngle();
+						switch(move){
+						case UP:
+							score =  Math.min(10.0, score+moveScoreDelta);
+							break;
+						case DOWN:
+							score -= moveScoreDelta;
+							break;
+						case LEFT:
+							angle = (angle-moveAngleDelta) % 360;
+							break;
+						case RIGHT:
+							angle = (angle+moveAngleDelta) % 360;
+						}
+						addShot(new Shot(score, angle, lastShot.getSize(), lastShot.getDelta()));
+					}
+				}finally{
+					lock.unlock();
 				}
-				addShot(new Shot(score, angle, lastShot.getSize(), lastShot.getDelta()));				
 			}
 		}
+		
 	}
 	
 }

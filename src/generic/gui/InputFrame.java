@@ -56,6 +56,7 @@ public class InputFrame extends JFrame{
 	private int nextScoreHeight;
 	private KeyProcessQue que;
 	private boolean debugMode = false;
+	private double bulletSize;
 	ShotRepo repo;
 	
 	public InputFrame(int width, int height, String discipline, Config cardConfig, ShotRepo repo) throws IOException {
@@ -72,6 +73,7 @@ public class InputFrame extends JFrame{
 		this.repo = repo;
 		this.textSize = config.getInt("textSize");
 		this.font = new Font(Font.SANS_SERIF, Font.PLAIN, textSize);
+		this.bulletSize = config.getDouble("bulletSize");
 		
 		this.init();
 		this.que = new KeyProcessQue();
@@ -201,7 +203,7 @@ public class InputFrame extends JFrame{
 				c = Coordinate.instance(c.x(), -c.y());
 				c = c.schale(scaleFactor);
 				double[] polar = c.toPolar();
-				Shot s = new Shot(10-polar[0], (int)polar[1]);
+				Shot s = new Shot(10-polar[0], (int)polar[1], bulletSize);
 				addShot(s);
 			}
 		}
@@ -330,7 +332,7 @@ public class InputFrame extends JFrame{
 				case RIGHT:
 					angle = (angle+moveAngleDelta) % 360;
 				}
-				addShot(new Shot(score, angle));				
+				addShot(new Shot(score, angle, bulletSize));				
 			}
 		}
 	}

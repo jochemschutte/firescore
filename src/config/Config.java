@@ -44,6 +44,16 @@ public class Config{
 		}
 	}
 	
+	public double getDouble(String id){
+		try{
+			return Double.parseDouble(getString(id));
+		}catch(NumberFormatException e){
+			throw new IllegalArgumentException(
+					String.format("NaN: key = \'%s\', value = \'%s\'", id, getString(id))
+				);
+		}
+	}
+	
 	public static Config getConfig(String id){
 		Config result = null;
 		String configPath = String.format("%s.prop", id);

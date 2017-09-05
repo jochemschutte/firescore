@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import config.Config;
 import exec.executable.ArgParser;
 import exec.executable.Option;
 import generic.gui.ShotRepo;
@@ -21,6 +22,8 @@ public class Move{
 		System.out.println("Started moving...");
 		try {
 			DocInput input = ShotReader.read(new File(String.format("data/%s/input.csv", args.get("date").getValue())));
+			Config cardConfig = Config.getConfig(String.format("cards/%s", input.getDiscipline()));
+			double bulletSize = cardConfig.getDouble("bulletSize");
 			File outputFile = new File("data/tmp/input.csv");
 			outputFile.getParentFile().mkdirs();
 			outputFile.createNewFile();
@@ -35,7 +38,7 @@ public class Move{
 					Coordinate c = shot.getXY();
 					
 					double[] polar = c.add(move).toPolar();
-					Shot movedShot = new Shot(10-polar[0], (int)polar[1]);
+					Shot movedShot = new Shot(10-polar[0], (int)polar[1], bulletSize);
 					repo.add(movedShot);
 				}
 				repo.newLine();

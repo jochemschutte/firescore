@@ -282,7 +282,7 @@ public class Job{
 		offsetMap.put(Card.Offset.SCORE, getCoordinate(prop.getString("offsets.SCORE")));
 		offsetMap.put(Card.Offset.SHOTS, getCoordinates(prop.getList("offsets.SHOTS")));
 		int deviation = prop.getInt("deviation");
-		int bulletSize = prop.getInt("bulletSize");
+		double bulletSize = prop.getDouble("bulletSize");
 		int textSize = prop.getInt("textSize");
 		return new Card(background, offsetMap, deviation, bulletSize, textSize, mode);
 	}

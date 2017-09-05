@@ -43,7 +43,6 @@ public class Card{
 //	protected int nrVisuals = 5;
 	private int nrVisuals;
 	private int factor;
-	private int bulletSize;
 	private Coordinate[] offsets;
 	private Coordinate avgOffset;
 	private Coordinate scoreOffset;
@@ -53,12 +52,11 @@ public class Card{
 	private BufferedImage background;
 	private List<List<Shot>> shots = new LinkedList<>();
 	
-	public Card(File backgroundLocation, Map<Offset, Object> offsetMap, int deviation, int bulletSize, int textSize, AVGMode mode){
+	public Card(File backgroundLocation, Map<Offset, Object> offsetMap, int deviation, double bulletFactor, int textSize, AVGMode mode){
 		this.avgMode = mode;
 		this.offsets = (Coordinate[])(offsetMap.get(Offset.SHOTS));
 		this.nrVisuals = this.offsets.length;
 		this.factor = deviation;
-		this.bulletSize = bulletSize;
 		this.avgOffset = (Coordinate)offsetMap.get(Offset.AVGSHOT);
 		this.scoreOffset = (Coordinate)offsetMap.get(Offset.SCORE);
 		this.font = new Font(Font.SANS_SERIF, Font.PLAIN, textSize);
@@ -137,14 +135,16 @@ public class Card{
 			}
 		}
 		List<Shot> flattened = flatten(this.shots);
+		
+		int dotSize = this.calcBulletSize();
 		switch(this.avgMode){
 		case PERVISUAL:
 			for(int i = 0; i < this.shots.size(); i++){
-				drawDot(g, Shot.avgXY(this.shots.get(i)), offsets[i%nrVisuals], Color.BLUE);
+				drawDot(g, Shot.avgXY(this.shots.get(i)), offsets[i%nrVisuals], dotSize, Color.BLUE);
 			}
 			break;
 		case TOTAL:
-			drawDot(g, Shot.avgXY(flattened), avgOffset, Color.BLUE);
+			drawDot(g, Shot.avgXY(flattened), avgOffset, dotSize, Color.BLUE);
 			break;
 		}
 		int totalScore = Shot.sumPoints(flattened);
@@ -156,6 +156,19 @@ public class Card{
 		g.drawString(Double.toString(avgScore), (int)scoreOffset.x()-moveLeft(avgScore)-1, (int)scoreOffset.y()+30);
 		
 		ImageIO.write(this.background, "PNG", output);
+	}
+	
+	public int calcBulletSize(){
+		Shot s = null;
+		Iterator<List<Shot>> listIter = this.shots.iterator();
+		while(s == null && listIter.hasNext()){
+			List<Shot> inner = listIter.next();
+			Iterator<Shot> shotIter = inner.iterator();
+			while(s == null && shotIter.hasNext()){
+				s = shotIter.next();
+			}
+		}
+		return (int)(this.factor * s.getSize());
 	}
 	
 	public int moveLeft(String in){
@@ -172,17 +185,17 @@ public class Card{
 		return moveLeft(Double.toString(num));
 	}
 	
-	public void drawDot(Graphics g, Coordinate shot, Coordinate offset, Card.Color color) throws IOException{
+	public void drawDot(Graphics g, Coordinate shot, Coordinate offset, int dotSize, Card.Color color) throws IOException{
 		BufferedImage dot = ImageIO.read(new File(String.format("%s/dot_%s.png", dotPath, color.toString())));
 		Coordinate c = Coordinate.instance(shot.x(), -shot.y());
-		c = c.schale(factor).add(offset);
-		int x = (int)c.x()-bulletSize/2;
-		int y = (int)c.y()-bulletSize/2;
-		g.drawImage(dot, x, y, bulletSize, bulletSize, null);
+		c = c.schale(factor).add(offset); 
+		int x = (int)c.x()-dotSize;
+		int y = (int)c.y()-dotSize;
+		g.drawImage(dot, x, y, dotSize*2, dotSize*2, null);
 	}
 	
 	public void drawDot(Graphics g, Shot shot, Coordinate offset, Card.Color color) throws IOException{
-		drawDot(g, shot.getXY(), offset, color);
+		drawDot(g, shot.getXY(), offset, (int)(factor*shot.getSize()), color);
 	}
 	
 	public void drawString(Graphics g, String printText, Coordinate c){

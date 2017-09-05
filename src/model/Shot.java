@@ -10,14 +10,16 @@ public class Shot implements DoubleValue{
 	
 	double score;
 	int angle;
+	double size;
 	
-	public Shot(double score, int angle) {
+	public Shot(double score, int angle, double size) {
 		this.score = score;
-		this.angle = angle;	
+		this.angle = angle;
+		this.size = size;
 	}
 	
 	public int getPoints(){
-		return Math.max((int)Math.ceil(score), 0);
+		return Math.max((int)(score+size), 0);
 	}
 
 	public double getScore() {
@@ -34,6 +36,14 @@ public class Shot implements DoubleValue{
 
 	public void setAngle(int angle) {
 		this.angle = angle;
+	}
+	
+	public double getSize(){
+		return this.size;
+	}
+	
+	public void setSize(int size){
+		this.size = size;
 	}
 	
 	public Coordinate getXY(){

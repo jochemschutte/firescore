@@ -240,13 +240,13 @@ public class Job{
 	}
 	
 	private String cardHtml(File img, int width, int height){
-		return String.format("<img src=\"cards/%s\" width=%d hight=%d>", img.getName(), width, height);
+		return String.format("<img src=\"cards/%s\" width=%d hight=%d border=1>", img.getName(), width, height);
 	}
 	
 	private String graphHtml(File graph){
 		int width = globalConfig.getInt("graphWidth");
 		int height = globalConfig.getInt("graphHeight");
-		return String.format("<img src=\"graphs/%s\" width=%d hight=%d>", graph.getName(), width, height);
+		return String.format("<img src=\"graphs/%s\" width=%d hight=%d border=1>", graph.getName(), width, height);
 	}
 	
 	private static <T> List<List<T>> allInBag(int bagId, int nrVisuals, List<List<T>> list){

@@ -1,4 +1,4 @@
-%discipline = air_rifle_5v_10m
+%discipline = air_rifle_1v_10m
 bulletType = air
 weaponType = rifle
 nrVisuals = 1
@@ -12,3 +12,4 @@ offsets.SCORE = 280,50
 rotations = [0]
 imgSize = 302
 textSize = 20
+shotDelta = 0

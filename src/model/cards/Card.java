@@ -43,6 +43,7 @@ public class Card{
 //	protected int nrVisuals = 5;
 	private int nrVisuals;
 	private int factor;
+	private double shotDelta;
 	private Coordinate[] offsets;
 	private Coordinate avgOffset;
 	private Coordinate scoreOffset;
@@ -52,14 +53,15 @@ public class Card{
 	private BufferedImage background;
 	private List<List<Shot>> shots = new LinkedList<>();
 	
-	public Card(File backgroundLocation, Map<Offset, Object> offsetMap, int deviation, double bulletFactor, int textSize, AVGMode mode){
+	public Card(File backgroundLocation, Map<Offset, Object> offsetMap, int factor, double shotDelta, double bulletFactor, int textSize, AVGMode mode){
 		this.avgMode = mode;
 		this.offsets = (Coordinate[])(offsetMap.get(Offset.SHOTS));
 		this.nrVisuals = this.offsets.length;
-		this.factor = deviation;
+		this.factor = factor;
 		this.avgOffset = (Coordinate)offsetMap.get(Offset.AVGSHOT);
 		this.scoreOffset = (Coordinate)offsetMap.get(Offset.SCORE);
 		this.font = new Font(Font.SANS_SERIF, Font.PLAIN, textSize);
+		this.shotDelta = shotDelta;
 		this.setShotsInSequence(new LinkedList<>());
 		try{
 			this.background = ImageIO.read(backgroundLocation);

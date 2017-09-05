@@ -12,3 +12,4 @@ offsets.SCORE = 910,40
 rotations = [0,-90,0,180,90]
 imgSize = 800
 textSize = 30
+shotDelta = 0

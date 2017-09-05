@@ -20,13 +20,14 @@ public class ShotReader{
 		String discipline = in.readLine();
 		Config cardConfig = Config.getConfig(String.format("cards/%s", discipline));
 		double shotSize = cardConfig.getDouble("bulletSize");
+		double scoreDelta = cardConfig.getDouble("shotDelta");
 		for(String line = in.readLine(); line != null; line = in.readLine()){
 			if(!line.trim().equals("")){
 				List<Shot> inner = new LinkedList<>();
 				for(String shot : line.split(";")){
 					if(!shot.equals(NULL)){
 						String[] parts = shot.split(",");
-						inner.add(new Shot(Double.parseDouble(parts[0]), Integer.parseInt(parts[1]), shotSize));
+						inner.add(new Shot(Double.parseDouble(parts[0]), Integer.parseInt(parts[1]), shotSize, scoreDelta));
 					}else{
 						inner.add(null);
 					}

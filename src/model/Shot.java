@@ -11,15 +11,17 @@ public class Shot implements DoubleValue{
 	double score;
 	int angle;
 	double size;
+	double delta;
 	
-	public Shot(double score, int angle, double size) {
+	public Shot(double score, int angle, double size, double scoreDelta) {
 		this.score = score;
 		this.angle = angle;
 		this.size = size;
+		this.delta = scoreDelta;
 	}
 	
 	public int getPoints(){
-		return Math.max((int)(score+size), 0);
+		return Math.max((int)(score+size-delta), 0);
 	}
 
 	public double getScore() {
@@ -42,8 +44,16 @@ public class Shot implements DoubleValue{
 		return this.size;
 	}
 	
-	public void setSize(int size){
+	public void setSize(double size){
 		this.size = size;
+	}
+	
+	public double getDelta(){
+		return this.delta;
+	}
+	
+	public void setDelta(double scoreDelta){
+		this.delta = scoreDelta;
 	}
 	
 	public Coordinate getXY(){
@@ -68,6 +78,11 @@ public class Shot implements DoubleValue{
 			total += shot.getPoints();
 		}
 		return total;
+	}
+	
+	public Shot move(double delta){
+		return new Shot(this.getScore()+delta, this.getAngle(), this.getSize(), this.getDelta());
+		
 	}
 	
 	@Override

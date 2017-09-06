@@ -130,10 +130,10 @@ public class Card{
 			String points = null;
 			if(this.shots.get(i).size() == 1){
 				points = Integer.toString(shotList.get(0).getPoints());
-				g.drawString(points, (int)(offsets[visualPointer].x()+9.5*factor), (int)offsets[visualPointer].y());
+				g.drawString(points, (int)(offsets[visualPointer].x()+10*factor), (int)offsets[visualPointer].y());
 			}else if(this.shots.get(i).size() > 1){
 				points = Double.toString(Shot.avgPoints(shotList));
-				g.drawString(points, (int)(offsets[visualPointer].x()+9.5*factor), (int)offsets[visualPointer].y());
+				g.drawString(points, (int)(offsets[visualPointer].x()+10*factor), (int)offsets[visualPointer].y());
 			}
 		}
 		List<Shot> flattened = flatten(this.shots);

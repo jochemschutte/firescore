@@ -91,7 +91,7 @@ public class Job{
 		
 		lg.draw(scoreList, Color.BLACK, 1);
 		
-		List<Double> avgScoreList = new DoubleAverager(globalConfig.getInt("graphAvgReach")).runDoubles(scoreList);
+		List<Double> avgScoreList = new DoubleAverager(cardConfig.getInt("graphAvgReach")).runDoubles(scoreList);
 		if(avgScoreList.size() > 1){
 			lg.draw(avgScoreList, Color.BLUE, 2);
 		}else{
@@ -205,14 +205,14 @@ public class Job{
 		}
 		File lapseOutput = new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath()));
 		out.write("<hr />\n");
-		out.write("Lapse: <br />\n");
+		out.write(String.format("Lapse (avg=%d): <br />\n", cardConfig.getInt("graphAvgReach")));
 		out.write(graphHtml(lapseOutput));
 		out.write(doubleBreak + "\n");
 		
 		
 		File avgOutput = new File(String.format("%s/graphs/avglapse.png", outputFolder.getAbsolutePath()));
 		if(avgOutput.exists()){
-			out.write(String.format("Averages (%d shots)<br>\n", globalConfig.getInt("graphAvgReach")*2+1));
+			out.write(String.format("Averages (%d shots)<br>\n", cardConfig.getInt("graphAvgReach")*2+1));
 			out.write(graphHtml(avgOutput) + "\n");
 		}
 		

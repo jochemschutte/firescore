@@ -13,3 +13,4 @@ rotations = [0]
 imgSize = 302
 textSize = 20
 shotDelta = 0
+graphAvgReach = 2

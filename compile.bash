@@ -1,9 +1,10 @@
+rm -rf bin/
+mkdir bin
 find -name "*.java" > sources.txt
 javac -d bin @sources.txt
 echo "_compiling to .class"
 rm sources.txt
 
-mkdir bin
 cd bin
 
 find -name "*.class" > bin.txt

@@ -24,7 +24,7 @@ public class Move{
 			DocInput input = ShotReader.read(new File(String.format("data/%s/input.csv", args.get("date").getValue())));
 			Config cardConfig = Config.getConfig(String.format("cards/%s", input.getDiscipline()));
 			double bulletSize = cardConfig.getDouble("bulletSize");
-			double scoreDelta = cardConfig.getDouble("scoreDelta");
+			double scoreDelta = cardConfig.getDouble("shotDelta");
 			File outputFile = new File("data/tmp/input.csv");
 			outputFile.getParentFile().mkdirs();
 			outputFile.createNewFile();

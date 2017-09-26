@@ -23,4 +23,6 @@ echo "_compiling Move.jar"
 
 rm manifest.txt
 rm bin.txt
+cd ..
+rm -rf bin
 echo "_finished!"

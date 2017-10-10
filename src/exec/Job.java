@@ -182,29 +182,38 @@ public class Job{
 		File outputFile = new File(String.format("%s/scores.html", outputFolder.getAbsolutePath()));
 		BufferedWriter out = new BufferedWriter(new FileWriter(outputFile));
 		out.write("<html>\n");
-		out.write(h(1, inputFile.getParentFile().getName()));
-		out.write("<font size=5>");
+		out.write("<font size=5>\n");
 		for(int i = 1; getCardFile(i).exists(); i++){
+			out.write("<p>\n");
+			if(i == 1){
+				out.write(h(1, inputFile.getParentFile().getName()));
+			}
 			File card = getCardFile(i);
 			if(card.getName().matches(".+_[0-9]+.png")){
 				out.write(card.getName().split("\\.")[0] + "<br />\n");
 				out.write(cardHtml(card) + "<br />&nbsp <br />\n");
 			}
+//			out.write("<hr />\n");
+			out.write("</p>\n");
 		}
-		out.write("<hr />\n");
 		File totalCard = new File(String.format("%s/cards/%s_total.png", outputFolder.getAbsolutePath(), this.discipline));
 		if(totalCard.exists()){
+			out.write("<p>\n");
 			out.write(totalCard.getName().split("\\.")[0] + "<br />\n");
 			out.write(cardHtml(totalCard) + doubleBreak +"\n");
+			out.write("</p>\n");
 		}
 		
 		File sumCard = new File(String.format("%s/cards/%s_sum.png", outputFolder.getAbsolutePath(), this.discipline));
 		if(sumCard.exists()){
+			out.write("<p>\n");
 			out.write(sumCard.getName().split("\\.")[0] + "<br />\n");
 			out.write(cardHtml(sumCard) + "\n");
+			out.write("</p>\n");
 		}
 		File lapseOutput = new File(String.format("%s/graphs/lapse.png", outputFolder.getAbsolutePath()));
-		out.write("<hr />\n");
+//		out.write("<hr />\n");
+		out.write("<p>\n");
 		out.write(String.format("Lapse (avg=%d): <br />\n", cardConfig.getInt("graphAvgReach")));
 		out.write(graphHtml(lapseOutput));
 		out.write(doubleBreak + "\n");
@@ -217,9 +226,10 @@ public class Job{
 		}
 		
 		File countGraph = new File(String.format("%s/graphs/count.png", outputFolder.getAbsolutePath()));
-		out.write("<hr />\n");
+//		out.write("<hr />\n");
 		out.write("Shots counted: <br />\n");
 		out.write(graphHtml(countGraph) + "\n");
+		out.write("</p>\n");
 		out.write("</font>\n</html>");
 		out.flush();
 		out.close();

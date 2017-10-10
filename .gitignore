@@ -6,5 +6,8 @@ test/
 src/crap
 output
 *.jar
-src/migratie/
 */.DS_STORE
+src/migratie/
+data/tst
+data/test
+data/tmp

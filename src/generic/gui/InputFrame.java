@@ -43,7 +43,7 @@ public class InputFrame extends JFrame{
 	private int width;
 	private int height;
 	private File imageFile;
-	private int pointer = 0;
+	private int pointer;
 	private Card card;
 	private Config config;
 	private Coordinate[] offsets;
@@ -110,6 +110,7 @@ public class InputFrame extends JFrame{
 	}
 	
 	private void init() throws IOException{
+		this.pointer = 0;
 		this.buffImg = ImageIO.read(imageFile);
 		nextScoreHeight = 0;
 		ImageIcon imgIcon = new ImageIcon(getScaledImage(buffImg, width, height));

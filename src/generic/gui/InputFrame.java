@@ -14,9 +14,11 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -56,7 +58,7 @@ public class InputFrame extends JFrame{
 	private Font font;
 	private int textSize;
 	private int nextScoreHeight;
-	private KeyProcessQue que;
+	private ImmutableKeyToggler toggler;
 	private boolean debugMode = false;
 	private double bulletSize;
 	private double shotDelta;
@@ -84,28 +86,28 @@ public class InputFrame extends JFrame{
 		this.minScore = config.getInt("minScore");
 		
 		this.init();
-		this.que = new KeyProcessQue();
-		this.addKeyListener(que);
-		this.addKeyListener(new InputFrameKeyListener(que));
+		this.toggler = new ImmutableKeyToggler(KeyEvent.VK_W);
+		this.addKeyListener(new InputFrameKeyListener(toggler));
 		this.addWindowListener(new InputFrameWindowListener());
+
+		this.setVisible(true);
 	}
 	
 	public void setDebugMode(boolean d){
 		this.debugMode = d;
 	}
 	
-	public void setKeyProcessQue(KeyProcessQue que){
+	public void setKeyProcessQue(ImmutableKeyToggler toggler){
 		for(KeyListener l : this.getKeyListeners()){
 			this.removeKeyListener(l);
 		}
-		this.que = que;
-		this.addKeyListener(que);
-		this.addKeyListener(new InputFrameKeyListener(que));
+		this.toggler = toggler;
+		this.addKeyListener(new InputFrameKeyListener(toggler));
 	}
 	
 	public InputFrame duplicate() throws IOException{
 		InputFrame result = new InputFrame(width, height, discipline, config, repo);
-		result.setKeyProcessQue(this.que);
+		result.setKeyProcessQue(this.toggler);
 		return result;
 	}
 	
@@ -126,7 +128,6 @@ public class InputFrame extends JFrame{
 		mainLabel.repaint();
 		repaint();
 		
-		this.setVisible(true);
 		this.setSize(width + this.getInsets().left, height + this.getInsets().top);
 	}
 	
@@ -162,6 +163,7 @@ public class InputFrame extends JFrame{
 	}
 	
 	private void closeCard(){
+		this.setVisible(false);
 		if(!repo.lastLineEmpty()){
 			repo.newLine();
 			try{
@@ -188,7 +190,6 @@ public class InputFrame extends JFrame{
 			System.out.println("_Finished");
 			System.exit(0);
 		}
-		this.setVisible(false);
 	}
 	
 	private static Image getScaledImage(BufferedImage buffImg, int w, int h){
@@ -226,29 +227,31 @@ public class InputFrame extends JFrame{
 		}
 	}
 	
-	public class KeyProcessQue extends KeyAdapter{
+	public class ImmutableKeyToggler{
+		Map<Integer, AtomicBoolean> available = new TreeMap<>();
 		
-		Set<Integer> available = new TreeSet<>();
-		
-		public KeyProcessQue(){
-			available.add(KeyEvent.VK_W);
+		public ImmutableKeyToggler(Integer... keyCodes){
+			Arrays.stream(keyCodes).forEach(keyCode -> available.put(keyCode, new AtomicBoolean(true)));
 		}
 		
-		@Override
-		public void keyReleased(KeyEvent e){
-			available.add(e.getKeyCode());
+		public boolean release(int keyCode){
+			return available.get(keyCode).getAndSet(true);
 		}
-		
+
 		public boolean process(int keyCode){
-			return available.remove(keyCode);
+			return available.get(keyCode).getAndSet(false);
+		}
+		
+		public boolean contains(int keyCode){
+			return available.containsKey(keyCode);
 		}
 	}
 	
 	public class InputFrameKeyListener extends KeyAdapter{
 		
-		KeyProcessQue toggle;
+		ImmutableKeyToggler toggle;
 		
-		public InputFrameKeyListener(KeyProcessQue toggle){
+		public InputFrameKeyListener(ImmutableKeyToggler toggle){
 			this.toggle = toggle;
 		}
 		
@@ -257,16 +260,40 @@ public class InputFrame extends JFrame{
 			new InputWorker(e, toggle).start();
 		}
 		
+		@Override
+		public void keyReleased(KeyEvent e){
+			new ReleaseWorker(e, toggle).start();
+		}
+		
+	}
+	
+	public class ReleaseWorker extends Thread{
+
+		KeyEvent e;
+		ImmutableKeyToggler toggler;
+		
+		public ReleaseWorker(KeyEvent ev, ImmutableKeyToggler toggler){
+			this.e = ev;
+			this.toggler = toggler;
+		}
+		
+		@Override
+		public void run() {
+			if(toggler.contains(e.getKeyCode())){
+				toggler.release(e.getKeyCode());
+			}
+		}
+		
 	}
 	
 	public class InputWorker extends Thread{
 		
 		KeyEvent e;
-		KeyProcessQue que;
+		ImmutableKeyToggler toggler;
 		
-		public InputWorker(KeyEvent ev, KeyProcessQue que){
+		public InputWorker(KeyEvent ev, ImmutableKeyToggler toggler){
 			this.e = ev;
-			this.que = que;
+			this.toggler = toggler;
 		}
 		
 		@Override
@@ -293,7 +320,7 @@ public class InputFrame extends JFrame{
 						move(Move.RIGHT);
 						break;
 					case KeyEvent.VK_W:
-						if(que.process(KeyEvent.VK_W)){
+						if(toggler.process(KeyEvent.VK_W)){
 							closeCard();
 						}
 						break;

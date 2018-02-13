@@ -1,0 +1,17 @@
+%discipline = air_rifle_1v_10m
+bulletType = sc
+weaponType = carbine
+nrVisuals = 1
+avgVisual = 0
+distanceToCard = 12 %m
+bulletSize = 0.3
+deviation = 34 %px
+offsets.SHOTS= [250\,250]
+offsets.AVGSHOT = 250,250 
+offsets.SCORE = 493,50 
+rotations = [0]
+imgSize = 500
+textSize = 18
+shotDelta = -1.17
+graphAvgReach = 2
+minScore = 6

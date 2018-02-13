@@ -26,42 +26,30 @@ public class Card{
 	public enum AVGMode {PERVISUAL, TOTAL};
 	public static final String cardPath = "cards";
 	public static final String dotPath = "cards/dots";
-//	public int factor = 18;
-//	public int bulletSize = 30;
-//	protected Coordinate[] offsets = {
-//			Coordinate.instance(237.000000, 237.000000), 
-//			Coordinate.instance(765.000000, 237.000000), 
-//			Coordinate.instance(501.000000, 501.000000), 
-//			Coordinate.instance(237.000000, 765.000000), 
-//			Coordinate.instance(765.000000, 765.000000)
-//			};
-
-//	protected Coordinate avgOffset = Coordinate.instance(501.000000, 501.000000);
-//	protected Coordinate scoreOffset = Coordinate.instance(910, 40);
-
 	
-//	protected int nrVisuals = 5;
 	private int nrVisuals;
 	private int factor;
-	private double shotDelta;
 	private Coordinate[] offsets;
 	private Coordinate avgOffset;
 	private Coordinate scoreOffset;
 	private Font font;
+	private int minScore;
+	private double shotDelta;
 	
 	private AVGMode avgMode;
 	private BufferedImage background;
 	private List<List<Shot>> shots = new LinkedList<>();
 	
-	public Card(File backgroundLocation, Map<Offset, Object> offsetMap, int factor, double shotDelta, double bulletFactor, int textSize, AVGMode mode){
+	public Card(File backgroundLocation, Map<Offset, Object> offsetMap, int factor, double bulletFactor, double shotDelta, int textSize, int minScore, AVGMode mode){
 		this.avgMode = mode;
 		this.offsets = (Coordinate[])(offsetMap.get(Offset.SHOTS));
 		this.nrVisuals = this.offsets.length;
 		this.factor = factor;
+		this.minScore = minScore;
+		this.shotDelta = shotDelta;
 		this.avgOffset = (Coordinate)offsetMap.get(Offset.AVGSHOT);
 		this.scoreOffset = (Coordinate)offsetMap.get(Offset.SCORE);
 		this.font = new Font(Font.SANS_SERIF, Font.PLAIN, textSize);
-		this.shotDelta = shotDelta;
 		this.setShotsInSequence(new LinkedList<>());
 		try{
 			this.background = ImageIO.read(backgroundLocation);
@@ -118,6 +106,7 @@ public class Card{
 	
 	public void draw(File output) throws IOException{
 		System.out.println(String.format("Generating '%s'.", output.getName()));
+		int visualScoreMove = (int)(10+1-minScore-shotDelta);
 		Graphics g = this.background.getGraphics();
 		g.setFont(font);
 		g.setColor(java.awt.Color.RED);
@@ -130,10 +119,10 @@ public class Card{
 			String points = null;
 			if(this.shots.get(i).size() == 1){
 				points = Integer.toString(shotList.get(0).getPoints());
-				g.drawString(points, (int)(offsets[visualPointer].x()+10*factor), (int)offsets[visualPointer].y());
+				g.drawString(points, (int)(offsets[visualPointer].x()+visualScoreMove*factor), (int)offsets[visualPointer].y());
 			}else if(this.shots.get(i).size() > 1){
 				points = Double.toString(Shot.avgPoints(shotList));
-				g.drawString(points, (int)(offsets[visualPointer].x()+10*factor), (int)offsets[visualPointer].y());
+				g.drawString(points, (int)(offsets[visualPointer].x()+visualScoreMove*factor), (int)offsets[visualPointer].y());
 			}
 		}
 		List<Shot> flattened = flatten(this.shots);

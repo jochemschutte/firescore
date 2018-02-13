@@ -60,6 +60,7 @@ public class InputFrame extends JFrame{
 	private boolean debugMode = false;
 	private double bulletSize;
 	private double shotDelta;
+	private int minScore;
 	ShotRepo repo;
 	public Lock lock = new ReentrantLock();
 	
@@ -80,6 +81,7 @@ public class InputFrame extends JFrame{
 		this.font = new Font(Font.SANS_SERIF, Font.PLAIN, textSize);
 		this.bulletSize = config.getDouble("bulletSize");
 		this.shotDelta = config.getDouble("shotDelta");
+		this.minScore = config.getInt("minScore");
 		
 		this.init();
 		this.que = new KeyProcessQue();
@@ -152,7 +154,7 @@ public class InputFrame extends JFrame{
 	}
 	
 	private void drawString(Graphics g, String txt){
-		double x = offsets[pointer].x()+9.5*factor;
+		double x = offsets[pointer].x()+(9.5+1-minScore-shotDelta)*factor;
 		double y = offsets[pointer].y()+nextScoreHeight;
 		card.drawString(g, txt, Coordinate.instance(x, y));
 		this.nextScoreHeight += textSize;
@@ -209,7 +211,7 @@ public class InputFrame extends JFrame{
 				c = Coordinate.instance(c.x(), -c.y());
 				c = c.schale(scaleFactor);
 				double[] polar = c.toPolar();
-				Shot s = new Shot(10-polar[0], (int)polar[1], bulletSize, shotDelta);
+				Shot s = new Shot(10-polar[0], (int)polar[1], bulletSize, shotDelta, minScore);
 				addShot(s);
 			}
 		}
@@ -340,7 +342,7 @@ public class InputFrame extends JFrame{
 						case RIGHT:
 							angle = (angle+moveAngleDelta) % 360;
 						}
-						addShot(new Shot(score, angle, lastShot.getSize(), lastShot.getDelta()));
+						addShot(new Shot(score, angle, lastShot.getSize(), lastShot.getDelta(), minScore));
 					}
 				}finally{
 					lock.unlock();

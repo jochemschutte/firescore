@@ -12,18 +12,26 @@ public class Shot implements DoubleValue{
 	int angle;
 	double size;
 	double delta;
+	int min;
 	
-	public Shot(double score, int angle, double size, double scoreDelta) {
+	public Shot(double score, int angle, double size, double scoreDelta, int min){
 		this.score = score;
 		this.angle = angle;
 		this.size = size;
 		this.delta = scoreDelta;
+		this.min = min;
+	}
+	
+	public Shot(double score, int angle, double size, double scoreDelta) {
+		this(score, angle, size, scoreDelta, 0);
 	}
 	
 	public int getPoints(){
-		return Math.max((int)(score+size-delta), 0);
+		int points = (int)(score+size-delta);
+		points = points >= min ? points : 0;
+		return Math.max(points, 0);
 	}
-
+	
 	public double getScore() {
 		return score;
 	}

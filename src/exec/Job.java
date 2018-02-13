@@ -294,8 +294,9 @@ public class Job{
 		int deviation = prop.getInt("deviation");
 		double bulletSize = prop.getDouble("bulletSize");
 		int textSize = prop.getInt("textSize");
+		int minScore = prop.getInt("minScore");
 		double shotDelta = prop.getDouble("shotDelta");
-		return new Card(background, offsetMap, deviation, shotDelta, bulletSize, textSize, mode);
+		return new Card(background, offsetMap, deviation, bulletSize, shotDelta, textSize, minScore, mode);
 	}
 	
 	private static String getDiscipline(Config prop){

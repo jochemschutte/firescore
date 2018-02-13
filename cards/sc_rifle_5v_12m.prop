@@ -14,3 +14,4 @@ imgSize = 800
 textSize = 30
 shotDelta = 0
 graphAvgReach = 2
+minScore = 1

@@ -36,7 +36,6 @@ public class Shot implements DoubleValue, Action{
 		points = points >= min ? points : 0;
 		return Math.min(Math.max(points, 0), 10);
 	}
-	
 	public double getScore() {
 		return score;
 	}

@@ -29,7 +29,7 @@ public class Shot implements DoubleValue{
 	public int getPoints(){
 		int points = (int)(score+size-delta);
 		points = points >= min ? points : 0;
-		return Math.max(points, 0);
+		return Math.min(Math.max(points, 0), 10);
 	}
 	
 	public double getScore() {

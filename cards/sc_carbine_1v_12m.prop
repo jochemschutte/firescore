@@ -13,5 +13,5 @@ rotations = [0]
 imgSize = 500
 textSize = 18
 shotDelta = -1.17
-graphAvgReach = 2
+graphAvgReach = 3
 minScore = 6

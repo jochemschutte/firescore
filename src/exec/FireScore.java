@@ -26,7 +26,7 @@ public class FireScore{
 					generate(inputFolder.getName(), generalConfig);
 				}
 				System.out.println("_Finished generating all.");
-				System.out.println("Will not open due to mass generation");
+				System.out.println("Will not open browser due to mass generation");
 			}else if(!arguments.get(OPENONLYOPTION).isSet()){
 				htmlFile = generate(arguments.get("date").getValue(), generalConfig);
 				openHTML(htmlFile);

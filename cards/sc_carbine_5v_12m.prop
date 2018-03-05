@@ -1,0 +1,17 @@
+%discipline = sc_carbine_1v_12m
+bulletType = sc
+weaponType = carbine
+nrVisuals = 5
+avgVisual = 2
+distanceToCard = 12 %m
+bulletSize = 0.4
+deviation = 24 %px
+offsets.SHOTS= [180\,180,620\,180,400\,400,180\,620,620\,620]
+offsets.AVGSHOT = 400,400 
+offsets.SCORE = 790,50 
+rotations = [0,0,0,0,0]
+imgSize = 800
+textSize = 18
+shotDelta = -1
+graphAvgReach = 3
+minScore = 6

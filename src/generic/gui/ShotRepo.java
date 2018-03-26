@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import model.Shot;
 
@@ -86,7 +87,7 @@ public class ShotRepo{
 		for(List<Shot> shots : shotList){
 			List<String> ser = new LinkedList<>();
 			for(Shot shot : shots){
-				ser.add(String.format("%f,%d", shot.getScore(), shot.getAngle()));
+				ser.add(String.format(Locale.US,"%f,%d", shot.getScore(), shot.getAngle()));
 			}
 			out.write(String.join(";", ser) + "\n");
 		}

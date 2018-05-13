@@ -160,7 +160,6 @@ public class InputFrame extends JFrame{
 		double y = offsets[pointer].y()+(nextScoreHeight/nrVisuals)*textSize;
 		card.drawString(g, txt, Coordinate.instance(x, y));
 		this.nextScoreHeight++;
-		System.out.println(this.nextScoreHeight);
 	}
 	
 	private void closeCard(){

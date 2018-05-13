@@ -57,7 +57,7 @@ public class InputFrame extends JFrame{
 	private int factor;
 	private Font font;
 	private int textSize;
-	private int nextScoreHeight = 0;
+	private int nextScoreHeight;
 	private ImmutableKeyToggler toggler;
 	private boolean debugMode = false;
 	private double bulletSize;
@@ -113,6 +113,7 @@ public class InputFrame extends JFrame{
 	
 	private void init() throws IOException{
 		this.pointer = 0;
+		this.nextScoreHeight = 0;
 		this.buffImg = ImageIO.read(imageFile);
 		ImageIcon imgIcon = new ImageIcon(getScaledImage(buffImg, width, height));
 		mainLabel = new JLabel("", imgIcon, JLabel.CENTER);
@@ -159,6 +160,7 @@ public class InputFrame extends JFrame{
 		double y = offsets[pointer].y()+(nextScoreHeight/nrVisuals)*textSize;
 		card.drawString(g, txt, Coordinate.instance(x, y));
 		this.nextScoreHeight++;
+		System.out.println(this.nextScoreHeight);
 	}
 	
 	private void closeCard(){

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import config.Config;
 import exec.executable.ArgParser;
@@ -30,12 +31,10 @@ public class Move{
 			outputFile.createNewFile();
 			ShotRepo repo = new ShotRepo(input.getDiscipline(), outputFile);
 			String moveString = args.get("move").getValue();
-			String[] moveParts = moveString.split("/");
-//			Coordinate move = Coordinate.instance(Double.parseDouble(moveParts[0]), Double.parseDouble(moveParts[1]));
+			String[] moveParts = moveString.substring(1, moveString.length()-1).split("/");
 			for(List<Shot> line : input.getShots()){
 				for(Shot shot : line){
 					Coordinate move = Coordinate.instance(Double.parseDouble(moveParts[0]), Double.parseDouble(moveParts[1]));
-//					System.out.println(shot.getXY().toString() + " - " + shot.getXY().add(move));
 					Coordinate c = shot.getXY();
 					
 					double[] polar = c.add(move).toPolar();
@@ -64,13 +63,10 @@ public class Move{
 			if(!new File(String.format("data/%s/input.csv", date)).exists()){
 				throw new IllegalArgumentException(String.format("Data folder '%s' does not exist.", date));
 			}
-			String[] moveParts = arguments.get("move").getValue().split("/");
-			
-			if(moveParts.length != 2){
-				throw new IllegalArgumentException("incorrect move format. Should be 'x/y'");
-			}
-			Double.parseDouble(moveParts[0]);
-			Double.parseDouble(moveParts[1]);	
+			String moveString = arguments.get("move").getValue();
+			if(Pattern.matches("(-?[0-9]+//-[0-9].+)", moveString)){
+				throw new IllegalArgumentException("incorrect move format. Should be '(x/y)'");
+			}	
 		}
 		
 	}

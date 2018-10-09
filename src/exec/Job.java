@@ -106,7 +106,7 @@ public class Job{
 		bg.draw(Color.BLUE);
 		bg.write(new File(String.format("%s/graphs/count.png", outputFolder.getAbsolutePath())));
 		
-	}
+	} 
 	
 	private static List<String> getIntList(int maxValue){
 		List<String> result = new LinkedList<>();

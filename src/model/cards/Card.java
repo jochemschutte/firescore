@@ -123,6 +123,7 @@ public class Card{
 			}else if(this.shots.get(i).size() > 1){
 				points = Double.toString(Shot.avgPoints(shotList));
 				g.drawString(points, (int)(offsets[visualPointer].x()+visualScoreMove*factor), (int)offsets[visualPointer].y());
+				g.drawString(String.format("%.1f", Shot.avgDev(shotList)), (int)(offsets[visualPointer].x()+visualScoreMove*factor), (int)offsets[visualPointer].y()+font.getSize());
 			}
 		}
 		List<Shot> flattened = flatten(this.shots);

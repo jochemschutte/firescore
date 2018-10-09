@@ -1,6 +1,6 @@
 package model;
 
-import java.util.Collection;
+import java.util.Collection; 
 import java.util.LinkedList;
 import java.util.List;
 
@@ -74,6 +74,12 @@ public class Shot implements DoubleValue{
 			cs.add(shot.getXY());
 		}
 		return Coordinate.avg(cs);
+	}
+	
+	public static double avgDev(Collection<Shot> shots) {
+		Coordinate avg = avgXY(shots);
+		double dev = shots.stream().map(s->s.getXY().subtract(avg)).mapToDouble(c->c.toPolar()[0]).sum();
+		return dev/shots.size();
 	}
 	
 	public static double avgPoints(Collection<Shot> shots){

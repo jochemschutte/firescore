@@ -1,12 +1,12 @@
 package model;
 
-import java.util.Collection; 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
 import model.DoubleAverager.DoubleValue;
 
-public class Shot implements DoubleValue{
+public class Shot implements DoubleValue, Action{
 	
 	double score;
 	int angle;
@@ -24,6 +24,11 @@ public class Shot implements DoubleValue{
 	
 	public Shot(double score, int angle, double size, double scoreDelta) {
 		this(score, angle, size, scoreDelta, 0);
+	}
+	
+	@Override
+	public ActionType getActionType() {
+		return Action.ActionType.SHOT;
 	}
 	
 	public int getPoints(){

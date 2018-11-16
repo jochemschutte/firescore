@@ -2,6 +2,7 @@ package move;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -12,6 +13,7 @@ import exec.executable.Option;
 import generic.gui.ShotRepo;
 import io.DocInput;
 import io.ShotReader;
+import model.Action;
 import model.Coordinate;
 import model.Shot;
 
@@ -32,14 +34,19 @@ public class Move{
 			ShotRepo repo = new ShotRepo(input.getDiscipline(), outputFile);
 			String moveString = args.get("move").getValue();
 			String[] moveParts = moveString.substring(1, moveString.length()-1).split("/");
-			for(List<Shot> line : input.getShots()){
-				for(Shot shot : line){
-					Coordinate move = Coordinate.instance(Double.parseDouble(moveParts[0]), Double.parseDouble(moveParts[1]));
-					Coordinate c = shot.getXY();
-					
-					double[] polar = c.add(move).toPolar();
-					Shot movedShot = new Shot(10-polar[0], (int)polar[1], bulletSize, scoreDelta);
-					repo.add(movedShot);
+			
+			for(List<Action> line : split(input.getActions())){
+				for(Action action : line){
+					Action movedShot = action;
+					if(action instanceof Shot) {
+						Shot shot = (Shot)action;
+						Coordinate move = Coordinate.instance(Double.parseDouble(moveParts[0]), Double.parseDouble(moveParts[1]));
+						Coordinate c = shot.getXY();
+						
+						double[] polar = c.add(move).toPolar();
+						movedShot = new Shot(10-polar[0], (int)polar[1], bulletSize, scoreDelta);
+					}
+					repo.addAction(movedShot);
 				}
 				repo.newLine();
 			}
@@ -48,6 +55,27 @@ public class Move{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static List<List<Action>> split(List<Action> orig){
+		List<List<Action>> result = new LinkedList<>();
+		List<Action> inner = new LinkedList<>();
+		for(Action a : orig) {
+			switch(a.getActionType()) {
+			case NEWCARD:
+				if(!inner.isEmpty()) {
+					result.add(inner);
+				}
+				inner = new LinkedList<>();
+				break;
+			default:
+				inner.add(a);
+			}
+		}
+		if(!inner.isEmpty()) {
+			result.add(inner);
+		}
+		return result;
 	}
 	
 	private static class MoveParser extends ArgParser{

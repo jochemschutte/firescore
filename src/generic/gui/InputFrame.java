@@ -29,7 +29,9 @@ import javax.swing.JLabel;
 
 import config.Config;
 import exec.Job;
+import model.Action;
 import model.Coordinate;
+import model.Pause;
 import model.Shot;
 import model.cards.Card;
 import model.cards.Card.AVGMode;
@@ -132,12 +134,16 @@ public class InputFrame extends JFrame{
 	}
 	
 	public void clear() throws IOException{
-		this.repo = new ShotRepo(repo.discipline, repo.getOutputFile());
+		this.repo = new ShotRepo(repo.getDiscipline(), repo.getOutputFile());
 		this.init();
 	}
 	
 	public void addShot(Shot s){
 		repo.add(s);
+		drawShot(s);
+	}
+	
+	public void drawShot(Shot s) {
 		try{
 			Graphics g = buffImg.getGraphics();
 			g.setColor(java.awt.Color.RED);
@@ -153,6 +159,20 @@ public class InputFrame extends JFrame{
 			exc.printStackTrace();
 		}
 		pointer = (pointer+1) % nrVisuals;
+	}
+	
+	private void drawPause() {
+		Graphics g = buffImg.getGraphics();
+		g.setColor(java.awt.Color.GREEN);
+		g.setFont(font);
+		double x = offsets[pointer].x()+(9.5+1-minScore-shotDelta)*factor;
+		double y = offsets[pointer].y()-textSize;
+		card.drawString(g, "P", Coordinate.instance(x, y));
+		buffImg.flush();
+		ImageIcon imgIcon = new ImageIcon(getScaledImage(buffImg, width, height));
+		mainLabel.setIcon(imgIcon);
+		mainLabel.repaint();
+		repaint();
 	}
 	
 	private void drawString(Graphics g, String txt){
@@ -324,6 +344,8 @@ public class InputFrame extends JFrame{
 							closeCard();
 						}
 						break;
+					case KeyEvent.VK_P:
+						makePause();
 					default:
 						return;
 					}
@@ -337,43 +359,54 @@ public class InputFrame extends JFrame{
 			clear();
 		}
 		
-		private Shot stepBack() throws IOException{
-			Shot result = null;
+		private Action stepBack() throws IOException{
+			Action result = null;
 			if(!repo.isEmpty()){
-				result = repo.removeLastShot();
-				List<Shot> lastLine = repo.removeLastCard();
+				result = repo.removeLastAction();
+				List<Action> lastLine = repo.getLastCard();
 				init();
-				for(Shot s : lastLine){
-					addShot(s);
+				for(Action a : lastLine){
+					if(a instanceof Shot) {
+						drawShot((Shot)a);
+					}else if(a instanceof Pause) {
+						drawPause();
+					}
 				}
 			}
 			return result;
 		}
 		
+		private void makePause() {
+			repo.addPause();
+			drawPause();
+		}
+		
 		private void move(Move move) throws IOException{
 			if(lock.tryLock()){
-				try{
-					Shot lastShot = stepBack();
-					if(lastShot != null){
-						double score = lastShot.getScore();
-						int angle = lastShot.getAngle();
-						switch(move){
-						case UP:
-							score =  Math.min(10.0, score+moveScoreDelta);
-							break;
-						case DOWN:
-							score -= moveScoreDelta;
-							break;
-						case LEFT:
-							angle = (angle-moveAngleDelta) % 360;
-							break;
-						case RIGHT:
-							angle = (angle+moveAngleDelta) % 360;
+				if(repo.getLastAction() instanceof Shot){
+					try{
+						Shot lastShot = (Shot)stepBack();
+						if(lastShot != null){
+							double score = lastShot.getScore();
+							int angle = lastShot.getAngle();
+							switch(move){
+							case UP:
+								score =  Math.min(10.0, score+moveScoreDelta);
+								break;
+							case DOWN:
+								score -= moveScoreDelta;
+								break;
+							case LEFT:
+								angle = (angle-moveAngleDelta) % 360;
+								break;
+							case RIGHT:
+								angle = (angle+moveAngleDelta) % 360;
+							}
+							addShot(new Shot(score, angle, lastShot.getSize(), lastShot.getDelta(), minScore));
 						}
-						addShot(new Shot(score, angle, lastShot.getSize(), lastShot.getDelta(), minScore));
+					}finally{
+						lock.unlock();
 					}
-				}finally{
-					lock.unlock();
 				}
 			}
 		}

@@ -87,6 +87,7 @@ public class Job{
 		List<Double> scoreList = listScores(shotList);
 		System.out.println("generating lapse");
 		BufferedLineGraph lg = initLineGraph(scoreList.size());
+		input.getPauses().stream().forEach(v->lg.drawVrule(v, Color.GREEN, 1));
 		lg.drawHrule(Shot.avgPoints(shotList), Color.RED, 1);
 		
 		lg.draw(scoreList, Color.BLACK, 1);

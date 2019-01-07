@@ -15,9 +15,8 @@ public class FireScore{
 	private static final String OPENONLYOPTION = "o";
 	
 	public static void main(String[] args){
-		FireScoreParser parser = new FireScoreParser();
-		Map<String, Option> arguments = parser.parse(args);
 		try{
+			Map<String, Option> arguments = new FireScoreParser().parse(args);
 			File htmlFile = null;
 			Config generalConfig = Config.getConfig("configs/global");
 			if(arguments.get(ALLOPTION).isSet()){
@@ -28,12 +27,14 @@ public class FireScore{
 				System.out.println("_Finished generating all.");
 				System.out.println("Will not open browser due to mass generation");
 			}else if(!arguments.get(OPENONLYOPTION).isSet()){
-				htmlFile = generate(arguments.get("date").getValue(), generalConfig);
+				htmlFile = generate(arguments.get("date").asText(), generalConfig);
 				openHTML(htmlFile);
 			}else{
 				System.out.println("Skipped generating");
-				openHTML(new File(String.format("output/%s/scores.html", arguments.get("date").getValue())));
+				openHTML(new File(String.format("output/%s/scores.html", arguments.get("date").asText())));
 			}
+		}catch(IllegalArgumentException e) {
+			System.out.println(e.getMessage());
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -88,7 +89,7 @@ public class FireScore{
 		@Override
 		protected void checkArguments(Map<String, Option> args) throws IllegalArgumentException {
 			if(args.get("date").isSet()){
-				String date = args.get("date").getValue();
+				String date = args.get("date").asText();
 				if(date.matches(".*[.\\/].*")){
 					throw new IllegalArgumentException("date cannot contain special characters like \"./\\\". Stop trying to hack my software!");
 				}

@@ -397,10 +397,10 @@ public class InputFrame extends JFrame{
 								score -= moveScoreDelta;
 								break;
 							case LEFT:
-								angle = (angle-moveAngleDelta) % 360;
+								angle = (angle+moveAngleDelta) % 360;
 								break;
 							case RIGHT:
-								angle = (angle+moveAngleDelta) % 360;
+								angle = (angle-moveAngleDelta) % 360;
 							}
 							addShot(new Shot(score, angle, lastShot.getSize(), lastShot.getDelta(), minScore));
 						}

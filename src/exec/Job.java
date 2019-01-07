@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import config.Config;
 import draw.BarGraph;
@@ -160,11 +161,7 @@ public class Job{
 	}
 	
 	private List<Double> listScores(List<Shot> shots){
-		List<Double> flatScores = new LinkedList<>();
-		for(Shot s : shots){
-			flatScores.add(s.getPoints() * 1.0);
-		}
-		return flatScores;
+		return shots.stream().map(s->s.getPoints()*1.0).collect(Collectors.toList());
 	}
 	
 	private BufferedLineGraph initLineGraph(int nrXValues) throws IOException{

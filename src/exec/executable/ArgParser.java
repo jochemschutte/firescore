@@ -91,6 +91,10 @@ public abstract class ArgParser{
 		throw new IllegalArgumentException(String.format("Option '%s' is not recognised. type '--help' for all options", key));
 	}
 	
+	public static void throwArg(String format, String... args) throws IllegalArgumentException{
+		throw new IllegalArgumentException(String.format(format, (Object[])args));
+	}
+	
 	private List<String> split(String line){
 		List<String> result = new LinkedList<>();
 		boolean escape = false;

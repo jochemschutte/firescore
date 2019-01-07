@@ -10,18 +10,20 @@ import exec.executable.Option;
 public class ShotInput{
 	
 	public static void main(String[] args){
-		Map<String, Option> arguments = new ShotInputParser().parse(args);
-		String cardType = arguments.get("card").getValue();
-		String date = arguments.get("date").getValue();
-		Config cardConfig = Config.getConfig(String.format("cards/%s", cardType));
-		int cardSize = cardConfig.getInt("imgSize");
 		try{
+			Map<String, Option> arguments = new ShotInputParser().parse(args);
+			String cardType = arguments.get("card").asText();
+			String date = arguments.get("date").asText();
+			Config cardConfig = Config.getConfig(String.format("cards/%s", cardType));
+			int cardSize = cardConfig.getInt("imgSize");
 			System.out.println("Starting...");
 			InputFrame f = new InputFrame(cardSize, cardSize, cardType, cardConfig, new ShotRepo(cardType, new File(String.format("data/%s/input.csv", date))));
 			if(arguments.get("D").isSet()){
 				f.setDebugMode(true);
 				System.out.println("Debug mode enabled");
 			}
+		}catch(IllegalArgumentException e) {
+			System.out.println(e.getMessage());
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -38,20 +40,26 @@ public class ShotInput{
 
 		@Override
 		protected void checkArguments(Map<String, Option> arguments) throws IllegalArgumentException {
-			if(!arguments.get("card").isSet()){
+			Option card = arguments.get("card");
+			if(!card.isSet()){
 				throw new IllegalArgumentException("No card was supplied");
 			}
+			if(!new File(String.format("cards/%s.png", card.asText())).exists()) {
+				throwArg("No card file found for '%s'", card.asText());
+			}
+			if(!new File(String.format("cards/%s.prop", card.asText())).exists()){
+				throwArg("No property file found for '%s'", card.asText());
+			}
 			if(!arguments.get("date").isSet() && !arguments.get("D").isSet()){
-				throw new IllegalArgumentException("Supply a date or open in debug mode (-D)");
+				throwArg("Supply a date or open in debug mode (-D)");
 			}
-			String date = arguments.get("date").getValue();
-			String card = arguments.get("card").getValue();
-			if(date.matches(".*[.\\/].*") || card.matches(".*[.\\/].*")){
-				throw new IllegalArgumentException("date or card cannot contain special characters like \"./\\\". Stop trying to hack my software!");
+			String date = arguments.get("date").asText();
+			if(date.matches(".*[.\\/].*") || card.asText().matches(".*[.\\/].*")){
+				throwArg("date or card cannot contain special characters like \"./\\\". Stop trying to hack my software!");
 			}
-			File outputFolder = new File(String.format("data/%s", arguments.get("date").getValue()));
+			File outputFolder = new File(String.format("data/%s", date));
 			if(outputFolder.exists() && !(arguments.get("F").isSet() || arguments.get("D").isSet())){
-				throw new IllegalArgumentException(String.format("A series already exists with date '%s'. Choose an other date or add force flag (-F) or debug flag (-D).", arguments.get("date").getValue()));
+				throwArg("A series already exists with date '%s'. Choose another date or add force flag (-F) or debug flag (-D).", date);
 			}
 			
 		}

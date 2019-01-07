@@ -24,7 +24,7 @@ public class Move{
 		Map<String, Option> args = parser.parse(argStrings);
 		System.out.println("Started moving...");
 		try {
-			DocInput input = ShotReader.read(new File(String.format("data/%s/input.csv", args.get("date").getValue())));
+			DocInput input = ShotReader.read(new File(String.format("data/%s/input.csv", args.get("date").asText())));
 			Config cardConfig = Config.getConfig(String.format("cards/%s", input.getDiscipline()));
 			double bulletSize = cardConfig.getDouble("bulletSize");
 			double scoreDelta = cardConfig.getDouble("shotDelta");
@@ -32,7 +32,7 @@ public class Move{
 			outputFile.getParentFile().mkdirs();
 			outputFile.createNewFile();
 			ShotRepo repo = new ShotRepo(input.getDiscipline(), outputFile);
-			String moveString = args.get("move").getValue();
+			String moveString = args.get("move").asText();
 			String[] moveParts = moveString.substring(1, moveString.length()-1).split("/");
 			
 			for(List<Action> line : split(input.getActions())){
@@ -87,11 +87,11 @@ public class Move{
 		
 		@Override
 		protected void checkArguments(Map<String, Option> arguments) throws IllegalArgumentException {
-			String date = arguments.get("date").getValue();
+			String date = arguments.get("date").asText();
 			if(!new File(String.format("data/%s/input.csv", date)).exists()){
 				throw new IllegalArgumentException(String.format("Data folder '%s' does not exist.", date));
 			}
-			String moveString = arguments.get("move").getValue();
+			String moveString = arguments.get("move").asText();
 			if(Pattern.matches("(-?[0-9]+//-[0-9].+)", moveString)){
 				throw new IllegalArgumentException("incorrect move format. Should be '(x/y)'");
 			}	

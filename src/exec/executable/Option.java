@@ -5,7 +5,6 @@ public class Option{
 	String key;
 	String value = null;
 	String description;
-	boolean set;
 	boolean manditory;
 	
 	public Option(String key, String description, boolean manditory){
@@ -18,36 +17,44 @@ public class Option{
 		return this.key;
 	}
 	
-	public String getValue(){
-		return this.value;
-	}
-	
 	public void setValue(String value){
 		this.value = value;
-		this.set = true;
 	}
 	
 	public int asInt(){
-		return Integer.parseInt(getValue());
+		return Integer.parseInt(value);
 	}
 	
 	public double asDouble(){
-		return Double.parseDouble(getValue());
+		return Double.parseDouble(value);
 	}
 	
 	public float asFloat(){
-		return Float.parseFloat(getValue());
+		return Float.parseFloat(value);
 	}
 	
 	public boolean asBoolean(){
-		return Boolean.parseBoolean(getValue());
+		return Boolean.parseBoolean(value);
+	}
+	
+	public String asText() {
+		return this.value;
+	}
+	
+	@Override
+	@Deprecated
+	/**
+	 * Use @link{asText} instead
+	 */
+	public String toString() {
+		return asText();
 	}
 	
 	@Override
 	public boolean equals(Object obj){
 		if(obj instanceof Option){
 			Option o = (Option)obj;
-			return this.key.equals(o.getKey()) && this.value.equals(o.getValue());
+			return this.key.equals(o.getKey()) && this.value.equals(o.asText());
 		}
 		return false;
 	}
@@ -61,7 +68,7 @@ public class Option{
 	}
 
 	public boolean isSet() {
-		return set;
+		return value != null;
 	}
 
 	public boolean isManditory() {

@@ -8,3 +8,4 @@ output
 data
 *.jar
 src/migratie/
+*/.DS_STORE
